@@ -52,7 +52,7 @@ variable "app_instance_count" {
   default     = 3
 }
 
-variable "key_name" {
-  description = "EC2 key pair name"
-  type        = string
-}
+#variable "key_name" {
+#  description = "EC2 key pair name"
+#  type        = string
+#}
