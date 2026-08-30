@@ -8,12 +8,22 @@ output "vpc_cidr" {
   value       = aws_vpc.main.cidr_block
 }
 
-output "public_subnet_ids" {
-  description = "Public subnet identifiers"
-  value       = aws_subnet.public[*].id
+output "alb_dns_name" {
+  description = "ALB DNS name — access your application here"
+  value       = aws_lb.main.dns_name
 }
 
-output "private_subnet_ids" {
-  description = "Private subnet identifiers"
-  value       = aws_subnet.private[*].id
+output "alb_url" {
+  description = "Full URL for the application"
+  value       = "http://${aws_lb.main.dns_name}"
+}
+
+output "app_instance_ids" {
+  description = "App instance IDs"
+  value       = aws_instance.app[*].id
+}
+
+output "target_group_arn" {
+  description = "Target group ARN"
+  value       = aws_lb_target_group.app.arn
 }
