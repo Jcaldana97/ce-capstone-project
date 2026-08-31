@@ -56,21 +56,23 @@ resource "aws_internet_gateway" "main" {
 }
 
 resource "aws_eip" "nat" {
+  count      = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : length(var.public_subnet_cidrs)) : 0
   domain     = "vpc"
   depends_on = [aws_internet_gateway.main]
 
   tags = {
-    Name = "${var.project_name}-nat-eip"
+    Name = "${var.project_name}-nat-eip-${count.index + 1}"
   }
 }
 
 resource "aws_nat_gateway" "main" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public[0].id
+  count         = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : length(var.public_subnet_cidrs)) : 0
+  allocation_id = aws_eip.nat[count.index].id
+  subnet_id     = aws_subnet.public[count.index].id
   depends_on    = [aws_internet_gateway.main]
 
   tags = {
-    Name = "${var.project_name}-nat"
+    Name = "${var.project_name}-nat-${count.index + 1}"
   }
 }
 
