@@ -55,6 +55,7 @@ module "alb" {
 module "compute" {
   source = "./modules/compute"
 
+  project_name             = var.project_name
   environment              = var.environment
   app_instance_count       = var.app_instance_count
   app_subnet_cidrs         = var.app_subnet_cidrs

@@ -13,7 +13,7 @@ resource "aws_instance" "app" {
 
   ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = "t3.micro"
-  subnet_id              = var.app_subnet_cidrs[count.index % length(var.app_subnet_cidrs)] != "" ? var.app_subnet_ids[count.index % length(var.app_subnet_cidrs)] : app_subnet_ids[0]
+  subnet_id              = var.app_subnet_cidrs[count.index % length(var.app_subnet_cidrs)] != "" ? var.app_subnet_ids[count.index % length(var.app_subnet_cidrs)] : var.app_subnet_ids[0]
   vpc_security_group_ids = [var.security_group_app_id]
   key_name               = var.key_name
 
