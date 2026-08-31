@@ -19,8 +19,8 @@ output "app_subnet_ids" {
 }
 
 output "data_subnet_ids" {
-  description = "IDs of app subnets"
-  value       = aws_subnet.app[*].id
+  description = "IDs of data subnets"
+  value       = aws_subnet.data[*].id
 }
 
 output "internet_gateway_id" {
@@ -40,7 +40,7 @@ output "public_route_table_id" {
 
 output "app_route_table_id" {
   description = "ID of app route tables"
-  value       = aws_route_table.app.id
+  value       = aws_route_table.app[*].id
 }
 
 output "data_route_table_id" {
