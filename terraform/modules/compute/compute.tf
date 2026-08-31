@@ -6,47 +6,196 @@ data "aws_ami" "amazon_linux_2" {
     name   = "name"
     values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
-}
 
-resource "aws_instance" "app" {
-  count = var.app_instance_count
-
-  ami                    = data.aws_ami.amazon_linux_2.id
-  instance_type          = "t3.micro"
-  subnet_id              = var.app_subnet_cidrs[count.index % length(var.app_subnet_cidrs)] != "" ? var.app_subnet_ids[count.index % length(var.app_subnet_cidrs)] : var.app_subnet_ids[0]
-  vpc_security_group_ids = [var.security_group_app_id]
-  key_name               = var.key_name
-
-  user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
-              yum install -y httpd
-              systemctl start httpd
-              systemctl enable httpd
-              INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-              AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
-              cat > /var/www/html/index.html <<HTML
-              <html>
-              <head><title>Project 1 - Terraform</title></head>
-              <body>
-                <h1>Project 1 — Deployed with Terraform</h1>
-                <p>Instance: $INSTANCE_ID</p>
-                <p>AZ: $AZ</p>
-              </body>
-              </html>
-              HTML
-              EOF
-
-  tags = {
-    Name        = "${var.project_name}-app-${count.index + 1}"
-    Environment = var.environment
-    Role        = "app"
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 }
 
-resource "aws_lb_target_group_attachment" "app" {
-  count            = var.app_instance_count
-  target_group_arn = var.alb_target_group_app_arn
-  target_id        = aws_instance.app[count.index].id
-  port             = 80
+
+#
+# Package the Flask application.
+#
+# Assumes the Terraform root module is run from the repository root
+# and the application is located at ./app/src.
+#
+data "archive_file" "app" {
+  type        = "zip"
+  source_dir  = "${path.root}/../app/src"
+  output_path = "${path.root}/../app.zip"
+}
+
+
+resource "aws_s3_bucket" "app" {
+  bucket_prefix = "${var.project_name}-app-"
+
+  tags = {
+    Name        = "${var.project_name}-app"
+    Environment = var.environment
+  }
+}
+
+resource "aws_s3_object" "app" {
+  bucket = aws_s3_bucket.app.id
+  key    = "app.zip"
+  source = data.archive_file.app.output_path
+
+  etag = filemd5(data.archive_file.app.output_path)
+}
+
+
+#
+# Launch Template
+#
+resource "aws_launch_template" "app" {
+  name_prefix   = "${var.project_name}-app-"
+  image_id      = data.aws_ami.amazon_linux_2.id
+  instance_type = var.app_instance_type
+  key_name      = var.key_name
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.app.name
+  }
+
+  vpc_security_group_ids = [
+    var.security_group_app_id
+  ]
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+
+    set -e
+
+    # Update packages
+    yum update -y
+
+    # Install Python and required tools
+    amazon-linux-extras enable python3.8
+    yum clean metadata
+    yum install -y python3.8 python3.8-pip unzip awscli
+
+    # Create application directory
+    mkdir -p /opt/app
+
+    # Download application package
+    aws s3 cp \
+      s3://${aws_s3_bucket.app.bucket}/app.zip \
+      /tmp/app.zip
+
+    unzip -o /tmp/app.zip -d /opt/app
+    
+    # Create Python virtual environment
+    python3.8 -m venv /opt/app/venv
+
+    # Install Python dependencies
+    /opt/app/venv/bin/pip install --upgrade pip
+    /opt/app/venv/bin/pip install -r /opt/app/src/requirements.txt
+
+    # Create systemd service
+    cat > /etc/systemd/system/flask-app.service <<SERVICE
+    [Unit]
+    Description=Flask Application
+    After=network.target
+
+    [Service]
+    User=root
+    WorkingDirectory=/opt/app/src
+    Environment="PATH=/opt/app/venv/bin"
+    ExecStart=/opt/app/venv/bin/gunicorn --bind 0.0.0.0:80 --workers 2 app:app
+    Restart=always
+    RestartSec=5
+
+    [Install]
+    WantedBy=multi-user.target
+    SERVICE
+
+    # Start Flask application
+    systemctl daemon-reload
+    systemctl enable flask-app
+    systemctl start flask-app
+
+  EOF
+  )
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name        = "${var.project_name}-app"
+      Environment = var.environment
+      Role        = "app"
+    }
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+
+    tags = {
+      Name        = "${var.project_name}-app"
+      Environment = var.environment
+      Role        = "app"
+    }
+  }
+}
+
+#
+# Auto Scaling Group
+#
+resource "aws_autoscaling_group" "app" {
+  name = "${var.project_name}-app-asg"
+
+  min_size         = var.app_min_size
+  max_size         = var.app_max_size
+  desired_capacity = var.app_instance_count
+
+  vpc_zone_identifier = var.app_subnet_ids
+
+  health_check_type         = "ELB"
+  health_check_grace_period = 300
+
+  target_group_arns = [
+    var.alb_target_group_app_arn
+  ]
+
+  launch_template {
+    id      = aws_launch_template.app.id
+    version = "$Latest"
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.project_name}-app"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Environment"
+    value               = var.environment
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Role"
+    value               = "app"
+    propagate_at_launch = true
+  }
+}
+
+#
+# CPU-based scaling
+#
+resource "aws_autoscaling_policy" "app" {
+  name                   = "${var.project_name}-app-cpu-scaling"
+  autoscaling_group_name = aws_autoscaling_group.app.name
+
+  policy_type = "TargetTrackingScaling"
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+
+    target_value = var.app_cpu_target
+  }
 }

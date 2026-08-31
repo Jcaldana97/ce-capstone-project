@@ -13,12 +13,35 @@ variable "app_instance_count" {
   description = "Number of app instances"
   type        = number
   default     = 3
+
+  validation {
+    condition     = var.app_instance_count >= 3
+    error_message = "app_instance_count must be at least 3."
+  }
 }
 
-variable "app_subnet_cidrs" {
-  description = "Application subnet CIDRs"
-  type        = list(string)
-  default     = ["10.0.11.0/24", "10.0.12.0/24"]
+variable "app_min_size" {
+  description = "Minimum number of application instances"
+  type        = number
+  default     = 3
+}
+
+variable "app_max_size" {
+  description = "Maximum number of application instances"
+  type        = number
+  default     = 6
+}
+
+variable "app_instance_type" {
+  description = "EC2 instance type for application instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "app_cpu_target" {
+  description = "Target average CPU utilization for application ASG"
+  type        = number
+  default     = 70
 }
 
 variable "app_subnet_ids" {

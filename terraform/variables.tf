@@ -52,6 +52,30 @@ variable "app_instance_count" {
   default     = 3
 }
 
+variable "app_min_size" {
+  description = "Minimum number of application instances"
+  type        = number
+  default     = 3
+}
+
+variable "app_max_size" {
+  description = "Maximum number of application instances"
+  type        = number
+  default     = 6
+}
+
+variable "app_instance_type" {
+  description = "EC2 instance type for application instances"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "app_cpu_target" {
+  description = "Target average CPU utilization for application ASG"
+  type        = number
+  default     = 70
+}
+
 variable "key_name" {
   description = "EC2 key pair name"
   type        = string

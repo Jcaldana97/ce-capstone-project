@@ -58,7 +58,10 @@ module "compute" {
   project_name             = var.project_name
   environment              = var.environment
   app_instance_count       = var.app_instance_count
-  app_subnet_cidrs         = var.app_subnet_cidrs
+  app_min_size             = var.app_min_size
+  app_max_size             = var.app_max_size
+  app_instance_type        = var.app_instance_type
+  app_cpu_target           = var.app_cpu_target
   app_subnet_ids           = module.vpc_dev.app_subnet_ids
   security_group_app_id    = module.security_groups.app_security_group_id
   alb_target_group_app_arn = module.alb.alb_target_group_app_arn
