@@ -49,3 +49,9 @@ variable "single_nat_gateway" {
   type        = bool
   default     = false
 }
+
+variable "tags" {
+  description = "Additional tags for resources"
+  type        = map(string)
+  default     = {}
+}
