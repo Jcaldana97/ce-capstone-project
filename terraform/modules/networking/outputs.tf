@@ -28,9 +28,9 @@ output "internet_gateway_id" {
   value       = aws_internet_gateway.main.id
 }
 
-output "nat_gateway_id" {
+output "nat_gateway_ids" {
   description = "IDs of NAT Gateway"
-  value       = aws_nat_gateway.main.id
+  value       = aws_nat_gateway.main[*].id
 }
 
 output "public_route_table_id" {

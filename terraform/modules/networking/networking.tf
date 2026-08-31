@@ -96,7 +96,7 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table" "app" {
-  count  = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : length(var.private_subnet_cidrs)) : 1
+  count  = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : length(var.app_subnet_cidrs)) : 1
   vpc_id = aws_vpc.main.id
 
   dynamic "route" {

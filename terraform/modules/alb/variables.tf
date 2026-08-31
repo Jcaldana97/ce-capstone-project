@@ -19,8 +19,8 @@ variable "security_group_alb_id" {
   type        = string
 }
 
-variable "alb_public_subnet_id" {
-  description = "Public Subnet ID where the ALB resides"
-  type        = string
+variable "alb_public_subnets" {
+  description = "Public Subnets mapped by the ALB"
+  type        = list(string)
 }
 
