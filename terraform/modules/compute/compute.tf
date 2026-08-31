@@ -22,8 +22,8 @@ data "aws_ami" "amazon_linux_2" {
 #
 data "archive_file" "app" {
   type        = "zip"
-  source_dir  = "${path.root}/app/src"
-  output_path = "${path.root}/app.zip"
+  source_dir  = "${path.root}/../app/src"
+  output_path = "${path.root}/../app.zip"
 }
 
 
