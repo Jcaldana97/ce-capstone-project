@@ -1,7 +1,7 @@
 resource "aws_security_group" "alb" {
   name        = "${var.project_name}-alb-sg"
   description = "Security group for Application Load Balancer"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
 
   ingress {
     description = "HTTP from anywhere"
@@ -34,7 +34,7 @@ resource "aws_security_group" "alb" {
 resource "aws_security_group" "app" {
   name        = "${var.project_name}-app-sg"
   description = "Security group for application servers"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
 
   ingress {
     description     = "HTTP from ALB"
@@ -59,7 +59,7 @@ resource "aws_security_group" "app" {
 resource "aws_security_group" "data" {
   name        = "${var.project_name}-data-sg"
   description = "Security group for data tier"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
 
   ingress {
     description     = "MySQL from app tier"
