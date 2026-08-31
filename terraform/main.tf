@@ -41,7 +41,7 @@ module "alb" {
   source = "./modules/alb"
 
   project_name          = var.project_name
-  environment           = var.environment
+  vpc_id                = module.vpc_dev.vpc_id
   security_group_alb_id = module.security_groups.alb_security_group_id
   alb_public_subnet_id  = module.vpc_dev.public_subnet_ids[0]
 }

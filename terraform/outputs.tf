@@ -1,22 +1,23 @@
 output "vpc_id" {
   description = "VPC identifier"
-  value       = aws_vpc.main.id
+  value       = module.vpc_dev.vpc_id
 }
 
 output "vpc_cidr" {
   description = "VPC CIDR block"
-  value       = aws_vpc.main.cidr_block
+  value       = module.vpc_dev.vpc_cidr
 }
 
-#output "alb_dns_name" {
-#  description = "ALB DNS name — access your application here"
-#  value       = aws_lb.main.dns_name
-#}
-#
-#output "alb_url" {
-#  description = "Full URL for the application"
-#  value       = "http://${aws_lb.main.dns_name}"
-#}
+output "alb_dns_name" {
+  description = "ALB DNS name — access your application here"
+  value       = module.alb.alb_dns_name
+}
+
+output "alb_url" {
+  description = "Full URL for the application"
+  value       = module.alb.alb_url
+}
+
 #
 #output "app_instance_ids" {
 #  description = "App instance IDs"
