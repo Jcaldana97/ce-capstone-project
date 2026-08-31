@@ -1,3 +1,9 @@
+variable "environment" {
+  description = "project environment"
+  type        = string
+  default     = "dev"
+}
+
 variable "app_instance_count" {
   description = "Number of app instances"
   type        = number
@@ -20,18 +26,15 @@ variable "security_group_app_id" {
   type        = string
 }
 
+variable "alb_target_group_app_arn" {
+  description = "ARN of the Target Group in the Load Balancer"
+  type        = string
+}
+
 variable "key_name" {
   description = "EC2 key pair name"
   type        = string
 }
 
-variable "environment" {
-  description = "project environment"
-  type        = string
-  default     = "dev"
-}
 
-variable "aws_lb_target_group_app_arn" {
-  description = "ARN of the Target Group in the Load Balancer"
-  type        = string
-}
+
