@@ -1,31 +1,23 @@
 variable "project_name" {
   description = "Project identifier"
   type        = string
-  default     = "capstone-project"
 }
 
 variable "environment" {
   description = "Deployment environment"
   type        = string
-  default     = "dev"
-}
-
-variable "aws_region" {
-  description = "AWS region"
-  type        = string
-  default     = "us-east-1"
-}
-
-variable "vpc_cidr" {
-  description = "CIDR block for the VPC"
-  type        = string
-  default     = "10.1.0.0/16"
 }
 
 variable "availability_zones" {
   description = "Availability zones"
   type        = list(string)
   default     = ["us-east-1a", "us-east-1b"]
+}
+
+variable "vpc_cidr" {
+  description = "CIDR block for the VPC"
+  type        = string
+  default     = "10.1.0.0/16"
 }
 
 variable "public_subnet_cidrs" {
@@ -46,14 +38,20 @@ variable "data_subnet_cidrs" {
   default     = ["10.0.21.0/24", "10.0.22.0/24"]
 }
 
-variable "app_instance_count" {
-  description = "Number of app instances"
-  type        = number
-  default     = 3
+variable "enable_nat_gateway" {
+  description = "Enable NAT Gateway for private subnets"
+  type        = bool
+  default     = true
 }
 
-variable "key_name" {
-  description = "EC2 key pair name"
-  type        = string
-  default     = "bootcamp-week2-key"
+variable "single_nat_gateway" {
+  description = "Use single NAT Gateway (cost savings)"
+  type        = bool
+  default     = false
+}
+
+variable "tags" {
+  description = "Additional tags for resources"
+  type        = map(string)
+  default     = {}
 }

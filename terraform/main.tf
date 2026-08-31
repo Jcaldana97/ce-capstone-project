@@ -16,67 +16,51 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-resource "aws_vpc" "main" {
-  cidr_block           = var.vpc_cidr
-  enable_dns_hostnames = true
-  enable_dns_support   = true
+module "vpc_dev" {
+  source = "./modules/networking"
+
+  project_name        = var.project_name
+  environment         = var.environment
+  availability_zones  = var.availability_zones
+  vpc_cidr            = var.vpc_cidr
+  public_subnet_cidrs = var.public_subnet_cidrs
+  app_subnet_cidrs    = var.app_subnet_cidrs
+  data_subnet_cidrs   = var.data_subnet_cidrs
+
+  enable_nat_gateway = true
+  single_nat_gateway = true # Cost savings for dev
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-vpc"
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    Pipeline    = "github-actions"
+    Owner = "DevTeam"
   }
 }
 
-resource "aws_subnet" "public" {
-  count                   = length(var.public_subnet_cidrs)
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.public_subnet_cidrs[count.index]
-  availability_zone       = data.aws_availability_zones.available.names[count.index]
-  map_public_ip_on_launch = true
+module "security_groups" {
+  source = "./modules/security-groups"
 
-  tags = {
-    Name = "${var.project_name}-public-${count.index + 1}"
-    Tier = "Public"
-  }
+  project_name = var.project_name
+  vpc_id       = module.vpc_dev.vpc_id
 }
 
-resource "aws_subnet" "private" {
-  count             = length(var.app_subnet_cidrs)
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.app_subnet_cidrs[count.index]
-  availability_zone = data.aws_availability_zones.available.names[count.index]
+module "alb" {
+  source = "./modules/alb"
 
-  tags = {
-    Name = "${var.project_name}-private-${count.index + 1}"
-    Tier = "Private"
-  }
+  project_name          = var.project_name
+  environment           = var.environment
+  vpc_id                = module.vpc_dev.vpc_id
+  security_group_alb_id = module.security_groups.alb_security_group_id
+  alb_public_subnets    = module.vpc_dev.public_subnet_ids
 }
 
-resource "aws_internet_gateway" "main" {
-  vpc_id = aws_vpc.main.id
+module "compute" {
+  source = "./modules/compute"
 
-  tags = {
-    Name = "${var.project_name}-igw"
-  }
-}
-
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main.id
-  }
-
-  tags = {
-    Name = "${var.project_name}-public-rt"
-  }
-}
-
-resource "aws_route_table_association" "public" {
-  count          = length(var.public_subnet_cidrs)
-  subnet_id      = aws_subnet.public[count.index].id
-  route_table_id = aws_route_table.public.id
+  project_name             = var.project_name
+  environment              = var.environment
+  app_instance_count       = var.app_instance_count
+  app_subnet_cidrs         = var.app_subnet_cidrs
+  app_subnet_ids           = module.vpc_dev.app_subnet_ids
+  security_group_app_id    = module.security_groups.app_security_group_id
+  alb_target_group_app_arn = module.alb.alb_target_group_app_arn
+  key_name                 = var.key_name
 }

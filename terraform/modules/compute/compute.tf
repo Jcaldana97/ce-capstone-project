@@ -13,8 +13,8 @@ resource "aws_instance" "app" {
 
   ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = "t3.micro"
-  subnet_id              = var.app_subnet_cidrs[count.index % length(var.app_subnet_cidrs)] != "" ? aws_subnet.app[count.index % length(var.app_subnet_cidrs)].id : aws_subnet.app[0].id
-  vpc_security_group_ids = [aws_security_group.app.id]
+  subnet_id              = var.app_subnet_cidrs[count.index % length(var.app_subnet_cidrs)] != "" ? var.app_subnet_ids[count.index % length(var.app_subnet_cidrs)] : var.app_subnet_ids[0]
+  vpc_security_group_ids = [var.security_group_app_id]
   key_name               = var.key_name
 
   user_data = <<-EOF
@@ -46,7 +46,7 @@ resource "aws_instance" "app" {
 
 resource "aws_lb_target_group_attachment" "app" {
   count            = var.app_instance_count
-  target_group_arn = aws_lb_target_group.app.arn
+  target_group_arn = var.alb_target_group_app_arn
   target_id        = aws_instance.app[count.index].id
   port             = 80
 }
