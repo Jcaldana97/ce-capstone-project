@@ -3,20 +3,1356 @@
 
 <head>
 
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Maestro del boleto</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    header {
+      background: #1f2937;
+      color: white;
+      padding: 25px;
+    }
+
+    header h1 {
+      margin: 0;
+    }
+
+    header p {
+      margin-bottom: 0;
+      color: #d1d5db;
+    }
+
+    .container {
+      max-width: 1250px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    /* =================================================
+           MAIN LAYOUT
+           ================================================= */
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      align-items: start;
+    }
+
+    .left-column,
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 22px;
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .card h2 {
+      margin-top: 0;
+    }
+
+    /* =================================================
+           AVAILABLE CONCERTS
+           ================================================= */
+
+    .concert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .concert {
+      position: relative;
+      min-height: 130px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      padding-right: 150px;
+      cursor: pointer;
+      transition: 0.2s;
+      overflow: hidden;
+    }
+
+    .concert:hover {
+      border-color: #2563eb;
+    }
+
+    .concert.selected {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+
+    .concert h3 {
+      margin: 0 0 8px 0;
+    }
+
+    .concert-info {
+      margin: 5px 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .band-image {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 130px;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0 6px 6px 0;
+    }
+
+    /* =================================================
+           FORMS
+           ================================================= */
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 11px 18px;
+      border: none;
+      border-radius: 5px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .result {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f3f4f6;
+      border-radius: 5px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    /* =================================================
+           ORDER SUMMARY
+           ================================================= */
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .summary-row:last-of-type {
+      border-bottom: none;
+    }
+
+    .summary-label {
+      color: #6b7280;
+    }
+
+    .summary-value {
+      text-align: right;
+      font-weight: bold;
+    }
+
+    .total {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 18px 0;
+    }
+
+    /* =================================================
+           FOOTER / INSTANCE INFORMATION
+           ================================================= */
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    footer span {
+      margin: 0 6px;
+    }
+
+    /* =================================================
+           RESPONSIVE
+           ================================================= */
+
+    @media (max-width: 850px) {
+
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+    @media (max-width: 500px) {
+
+      .concert {
+        padding-right: 16px;
+        padding-bottom: 120px;
+      }
+
+      .band-image {
+        width: 100%;
+        height: 100px;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: auto;
+        border-radius: 0 0 6px 6px;
+      }
+
+    }
+  </style>
+
 </head>
 
 
 <body>
 
-<header>
 
-    <h1>Order Service</h1>
+  <header>
+
+    <h1>🎫 Maestro del boleto</h1>
 
     <p>
-        Customer interface for carts, orders and monitoring
+      Select your concert, tickets and payment information
+      to complete your order.
     </p>
 
-</header>
+  </header>
+
+
+  <div class="container">
+
+
+    <div class="main-layout">
+
+
+      <!-- =================================================
+             LEFT COLUMN
+             AVAILABLE CONCERTS
+             ================================================= -->
+
+      <div class="left-column">
+
+        <div class="card">
+
+          <h2>🎵 Available Concerts</h2>
+
+          <div class="concert-list">
+
+
+            <!-- =================================================
+                         COLDPLAY
+                         ================================================= -->
+
+            <div class="concert" onclick="selectConcert(
+                            this,
+                            'Coldplay',
+                            'Olympiastadion Berlin',
+                            '15 September 2026'
+                         )">
+
+              <h3>Coldplay</h3>
+
+              <p class="concert-info">
+                📍 Olympiastadion Berlin
+              </p>
+
+              <p class="concert-info">
+                📅 15 September 2026
+              </p>
+
+              <img class="band-image" src="{{ url_for(
+                                'static',
+                                filename='images/coldplay.png'
+                            ) }}" alt="Coldplay">
+
+            </div>
+
+
+            <!-- =================================================
+                         TAME IMPALA
+                         ================================================= -->
+
+            <div class="concert" onclick="selectConcert(
+                            this,
+                            'Tame Impala',
+                            'Mercedes-Benz Arena Berlin',
+                            '22 September 2026'
+                         )">
+
+              <h3>Tame Impala</h3>
+
+              <p class="concert-info">
+                📍 Mercedes-Benz Arena Berlin
+              </p>
+
+              <p class="concert-info">
+                📅 22 September 2026
+              </p>
+
+              <img class="band-image" src="{{ url_for(
+                                'static',
+                                filename='images/tame-impala.png'
+                            ) }}" alt="Tame Impala">
+
+            </div>
+
+
+            <!-- =================================================
+                         THE STROKES
+                         ================================================= -->
+
+            <div class="concert" onclick="selectConcert(
+                            this,
+                            'The Strokes',
+                            'Messe München',
+                            '30 September 2026'
+                         )">
+
+              <h3>The Strokes</h3>
+
+              <p class="concert-info">
+                📍 Messe München
+              </p>
+
+              <p class="concert-info">
+                📅 30 September 2026
+              </p>
+
+              <img class="band-image" src="{{ url_for(
+                                'static',
+                                filename='images/the-strokes.png'
+                            ) }}" alt="The Strokes">
+
+            </div>
+
+
+            <!-- =================================================
+                         BAD BUNNY
+                         ================================================= -->
+
+            <div class="concert" onclick="selectConcert(
+                            this,
+                            'Bad Bunny',
+                            'Deutsche Bank Park Frankfurt',
+                            '8 October 2026'
+                         )">
+
+              <h3>Bad Bunny</h3>
+
+              <p class="concert-info">
+                📍 Deutsche Bank Park Frankfurt
+              </p>
+
+              <p class="concert-info">
+                📅 8 October 2026
+              </p>
+
+              <img class="band-image" src="{{ url_for(
+                                'static',
+                                filename='images/bad-bunny.png'
+                            ) }}" alt="Bad Bunny">
+
+            </div>
+
+
+            <!-- =================================================
+                         TWENTY ONE PILOTS
+                         ================================================= -->
+
+            <div class="concert" onclick="selectConcert(
+                            this,
+                            'Twenty One Pilots',
+                            'Veltins-Arena Gelsenkirchen',
+                            '17 October 2026'
+                         )">
+
+              <h3>Twenty One Pilots</h3>
+
+              <p class="concert-info">
+                📍 Veltins-Arena Gelsenkirchen
+              </p>
+
+              <p class="concert-info">
+                📅 17 October 2026
+              </p>
+
+              <img class="band-image" src="{{ url_for(
+                                'static',
+                                filename='images/top.png'
+                            ) }}" alt="Twenty One Pilots">
+
+            </div>
+
+
+            <!-- =================================================
+                         CALONCHO
+                         ================================================= -->
+
+            <div class="concert" onclick="selectConcert(
+                            this,
+                            'Caloncho',
+                            'RheinEnergieSTADION Köln',
+                            '25 October 2026'
+                         )">
+
+              <h3>Caloncho</h3>
+
+              <p class="concert-info">
+                📍 RheinEnergieSTADION Köln
+              </p>
+
+              <p class="concert-info">
+                📅 25 October 2026
+              </p>
+
+              <img class="band-image" src="{{ url_for(
+                                'static',
+                                filename='images/caloncho.png'
+                            ) }}" alt="Caloncho">
+
+            </div>
+
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+             RIGHT COLUMN
+             ================================================= -->
+
+      <div class="right-column">
+
+
+        <!-- =================================================
+                 TICKETS
+                 ================================================= -->
+
+        <div class="card">
+
+          <h2>🎟️ Tickets</h2>
+
+
+          <!-- Zone is intentionally above ticket quantity -->
+
+          <label for="ticketZone">
+            Stadium Zone
+          </label>
+
+          <select id="ticketZone" onchange="updateTotal()">
+
+            <option value="89.99">
+              Standing — €89.99
+            </option>
+
+            <option value="119.99">
+              Upper Tier — €119.99
+            </option>
+
+            <option value="149.99">
+              Lower Tier — €149.99
+            </option>
+
+            <option value="199.99">
+              VIP / Front Stage — €199.99
+            </option>
+
+          </select>
+
+
+          <label for="ticketQuantity">
+            Number of Tickets
+          </label>
+
+          <select id="ticketQuantity" onchange="updateTotal()">
+
+            <option value="1">
+              1 Ticket
+            </option>
+
+            <option value="2">
+              2 Tickets
+            </option>
+
+            <option value="3">
+              3 Tickets
+            </option>
+
+            <option value="4">
+              4 Tickets
+            </option>
+
+            <option value="5">
+              5 Tickets
+            </option>
+
+            <option value="6">
+              6 Tickets
+            </option>
+
+            <option value="7">
+              7 Tickets
+            </option>
+
+            <option value="8">
+              8 Tickets
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- =================================================
+                 PURCHASE INFORMATION
+                 ================================================= -->
+
+        <div class="card">
+
+          <h2>👤 Purchase Information</h2>
+
+          <label for="customerName">
+            Full Name
+          </label>
+
+          <input id="customerName" type="text" placeholder="John Doe" autocomplete="name">
+
+          <label for="customerEmail">
+            Email Address
+          </label>
+
+          <input id="customerEmail" type="email" placeholder="john@example.com" autocomplete="email">
+
+        </div>
+
+
+        <!-- =================================================
+                 PAYMENT INFORMATION
+                 ================================================= -->
+
+        <div class="card">
+
+          <h2>🏦 Payment Information</h2>
+
+          <!--
+                    Demo field only.
+                    Do not use real bank information.
+                -->
+
+          <label for="bankAccount">
+            Bank Account / IBAN
+          </label>
+
+          <input id="bankAccount" type="text" placeholder="DE00 0000 0000 0000 0000 00" autocomplete="off">
+
+          <label for="accountHolder">
+            Account Holder Name
+          </label>
+
+          <input id="accountHolder" type="text" placeholder="John Doe" autocomplete="off">
+
+        </div>
+
+
+        <!-- =================================================
+                 ORDER SUMMARY
+                 ================================================= -->
+
+        <div class="card">
+
+          <h2>🧾 Order Summary</h2>
+
+
+          <div class="summary-row">
+
+            <span class="summary-label">
+              Concert
+            </span>
+
+            <span class="summary-value" id="summaryConcert">
+              -
+            </span>
+
+          </div>
+
+
+          <div class="summary-row">
+
+            <span class="summary-label">
+              Venue
+            </span>
+
+            <span class="summary-value" id="summaryVenue">
+              -
+            </span>
+
+          </div>
+
+
+          <div class="summary-row">
+
+            <span class="summary-label">
+              Date
+            </span>
+
+            <span class="summary-value" id="summaryDate">
+              -
+            </span>
+
+          </div>
+
+
+          <div class="summary-row">
+
+            <span class="summary-label">
+              Zone
+            </span>
+
+            <span class="summary-value" id="summaryZone">
+              -
+            </span>
+
+          </div>
+
+
+          <div class="summary-row">
+
+            <span class="summary-label">
+              Tickets
+            </span>
+
+            <span class="summary-value" id="summaryTickets">
+              0
+            </span>
+
+          </div>
+
+
+          <div class="summary-row">
+
+            <span class="summary-label">
+              Price / Ticket
+            </span>
+
+            <span class="summary-value" id="summaryPrice">
+              €0.00
+            </span>
+
+          </div>
+
+
+          <div class="total" id="totalAmount">
+            €0.00
+          </div>
+
+
+          <button onclick="createOrder()">
+            Complete Order
+          </button>
+
+
+          <div id="orderResult" class="result">
+            No order completed yet.
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+  <!-- =========================================================
+     FOOTER
+     ========================================================= -->
+
+  <footer>
+
+    Instance ID:
+    <strong id="instanceId">
+      Loading...
+    </strong>
+
+    <span>|</span>
+
+    Availability Zone:
+    <strong id="availabilityZone">
+      Loading...
+    </strong>
+
+    <span>|</span>
+
+    Health:
+    <strong id="serviceStatus">
+      Checking...
+    </strong>
+
+  </footer>
+
+
+  <script>
+
+
+    // =========================================================
+    // Application state
+    // =========================================================
+
+    let selectedConcertData = {
+
+      name: null,
+
+      venue: null,
+
+      date: null
+
+    };
+
+
+    // =========================================================
+    // Zone prices
+    //
+    // The selected zone determines the ticket price.
+    // =========================================================
+
+    const zonePrices = {
+
+      "Standing":
+        89.99,
+
+      "Upper Tier":
+        119.99,
+
+      "Lower Tier":
+        149.99,
+
+      "VIP / Front Stage":
+        199.99
+
+    };
+
+
+    // =========================================================
+    // Select concert
+    // =========================================================
+
+    function selectConcert(
+      element,
+      name,
+      venue,
+      date
+    ) {
+
+      document
+        .querySelectorAll(".concert")
+        .forEach(function (concert) {
+
+          concert.classList.remove(
+            "selected"
+          );
+
+        });
+
+
+      element.classList.add(
+        "selected"
+      );
+
+
+      selectedConcertData = {
+
+        name: name,
+
+        venue: venue,
+
+        date: date
+
+      };
+
+
+      updateTotal();
+
+    }
+
+
+    // =========================================================
+    // Get selected zone name
+    // =========================================================
+
+    function getSelectedZone() {
+
+      const zoneSelect =
+        document.getElementById(
+          "ticketZone"
+        );
+
+
+      return zoneSelect
+        .options[
+        zoneSelect.selectedIndex
+      ]
+        .text
+        .split(" — ")[0];
+
+    }
+
+
+    // =========================================================
+    // Get selected zone price
+    // =========================================================
+
+    function getSelectedZonePrice() {
+
+      return parseFloat(
+        document.getElementById(
+          "ticketZone"
+        ).value
+      );
+
+    }
+
+
+    // =========================================================
+    // Calculate total and update order summary
+    // =========================================================
+
+    function updateTotal() {
+
+      const quantity =
+        parseInt(
+          document.getElementById(
+            "ticketQuantity"
+          ).value
+        );
+
+
+      const price =
+        getSelectedZonePrice();
+
+
+      const zone =
+        getSelectedZone();
+
+
+      const total =
+        quantity * price;
+
+
+      document.getElementById(
+        "summaryConcert"
+      ).textContent =
+        selectedConcertData.name || "-";
+
+
+      document.getElementById(
+        "summaryVenue"
+      ).textContent =
+        selectedConcertData.venue || "-";
+
+
+      document.getElementById(
+        "summaryDate"
+      ).textContent =
+        selectedConcertData.date || "-";
+
+
+      document.getElementById(
+        "summaryZone"
+      ).textContent =
+        selectedConcertData.name
+          ? zone
+          : "-";
+
+
+      document.getElementById(
+        "summaryTickets"
+      ).textContent =
+        selectedConcertData.name
+          ? quantity
+          : 0;
+
+
+      document.getElementById(
+        "summaryPrice"
+      ).textContent =
+        selectedConcertData.name
+          ? formatCurrency(price)
+          : "€0.00";
+
+
+      document.getElementById(
+        "totalAmount"
+      ).textContent =
+        selectedConcertData.name
+          ? formatCurrency(total)
+          : "€0.00";
+
+    }
+
+
+    // =========================================================
+    // Currency formatting
+    // =========================================================
+
+    function formatCurrency(value) {
+
+      return new Intl.NumberFormat(
+        "de-DE",
+        {
+          style: "currency",
+          currency: "EUR"
+        }
+      ).format(value);
+
+    }
+
+
+    // =========================================================
+    // Complete order
+    // =========================================================
+
+    async function createOrder() {
+
+      const resultElement =
+        document.getElementById(
+          "orderResult"
+        );
+
+
+      if (!selectedConcertData.name) {
+
+        resultElement.textContent =
+          "Please select a concert.";
+
+        return;
+
+      }
+
+
+      const customerName =
+        document.getElementById(
+          "customerName"
+        ).value.trim();
+
+
+      const customerEmail =
+        document.getElementById(
+          "customerEmail"
+        ).value.trim();
+
+
+      const bankAccount =
+        document.getElementById(
+          "bankAccount"
+        ).value.trim();
+
+
+      const accountHolder =
+        document.getElementById(
+          "accountHolder"
+        ).value.trim();
+
+
+      const quantity =
+        parseInt(
+          document.getElementById(
+            "ticketQuantity"
+          ).value
+        );
+
+
+      const zone =
+        getSelectedZone();
+
+
+      const price =
+        getSelectedZonePrice();
+
+
+      const total =
+        quantity * price;
+
+
+      if (!customerName) {
+
+        resultElement.textContent =
+          "Please enter the purchaser name.";
+
+        return;
+
+      }
+
+
+      if (!customerEmail) {
+
+        resultElement.textContent =
+          "Please enter the purchaser email.";
+
+        return;
+
+      }
+
+
+      if (!bankAccount) {
+
+        resultElement.textContent =
+          "Please enter the bank account.";
+
+        return;
+
+      }
+
+
+      if (!accountHolder) {
+
+        resultElement.textContent =
+          "Please enter the account holder name.";
+
+        return;
+
+      }
+
+
+      try {
+
+        // -------------------------------------------------
+        // Create internal cart.
+        //
+        // The cart is used only for backend abandonment
+        // monitoring and is not displayed to the customer.
+        // -------------------------------------------------
+
+        const cartResponse =
+          await fetch(
+            "/cart",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+
+                user_id:
+                  customerEmail,
+
+                items:
+                  quantity
+
+              })
+            }
+          );
+
+
+        const cartData =
+          await cartResponse.json();
+
+
+        if (!cartResponse.ok) {
+
+          throw new Error(
+            cartData.message ||
+            "Unable to create ticket cart."
+          );
+
+        }
+
+
+        const cartId =
+          cartData.cart_id;
+
+
+        const correlationId =
+          cartData.correlation_id;
+
+
+        // -------------------------------------------------
+        // Complete order
+        //
+        // Personal information is sent to the backend,
+        // but the server does not log it.
+        // -------------------------------------------------
+
+        const orderResponse =
+          await fetch(
+            "/order",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+
+                cart_id:
+                  cartId,
+
+                user_id:
+                  customerEmail,
+
+                amount:
+                  total,
+
+                items:
+                  quantity,
+
+                customer_name:
+                  customerName,
+
+                customer_email:
+                  customerEmail,
+
+                concert:
+                  selectedConcertData.name,
+
+                venue:
+                  selectedConcertData.venue,
+
+                concert_date:
+                  selectedConcertData.date,
+
+                ticket_location:
+                  zone,
+
+                bank_account:
+                  bankAccount,
+
+                account_holder:
+                  accountHolder
+
+              })
+            }
+          );
+
+
+        const orderData =
+          await orderResponse.json();
+
+
+        if (!orderResponse.ok) {
+
+          throw new Error(
+            orderData.message ||
+            "Unable to complete order."
+          );
+
+        }
+
+
+        // -------------------------------------------------
+        // Only display correlation ID and cart ID after
+        // successful order completion.
+        // -------------------------------------------------
+
+        resultElement.textContent =
+          "Correlation ID: " +
+          orderData.correlation_id +
+          "\n" +
+          "Cart ID: " +
+          orderData.cart_id;
+
+
+      } catch (error) {
+
+        resultElement.textContent =
+          "Order failed:\n" +
+          error.message;
+
+      }
+
+    }
+
+
+    // =========================================================
+    // Load EC2 instance information
+    // =========================================================
+
+    async function loadInstanceInfo() {
+
+      try {
+
+        const response =
+          await fetch(
+            "/instance-info"
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            "Unable to retrieve instance information."
+          );
+
+        }
+
+
+        document.getElementById(
+          "instanceId"
+        ).textContent =
+          data.instance_id ||
+          "Unavailable";
+
+
+        document.getElementById(
+          "availabilityZone"
+        ).textContent =
+          data.availability_zone ||
+          "Unavailable";
+
+
+      } catch (error) {
+
+        document.getElementById(
+          "instanceId"
+        ).textContent =
+          "Unavailable";
+
+
+        document.getElementById(
+          "availabilityZone"
+        ).textContent =
+          "Unavailable";
+
+      }
+
+
+      await loadHealth();
+
+    }
+
+
+    // =========================================================
+    // Load service health
+    // =========================================================
+
+    async function loadHealth() {
+
+      const statusElement =
+        document.getElementById(
+          "serviceStatus"
+        );
+
+
+      try {
+
+        const response =
+          await fetch(
+            "/health"
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          response.ok &&
+          data.status === "healthy"
+        ) {
+
+          statusElement.textContent =
+            "Healthy";
+
+        } else {
+
+          statusElement.textContent =
+            "Unhealthy";
+
+        }
+
+
+      } catch (error) {
+
+        statusElement.textContent =
+          "Unavailable";
+
+      }
+
+    }
+
+
+    // =========================================================
+    // Initial page load
+    // =========================================================
+
+    updateTotal();
+
+    loadInstanceInfo();
+
+
+    // =========================================================
+    // Refresh instance information and health
+    // =========================================================
+
+    setInterval(
+      loadInstanceInfo,
+      30000
+    );
+
+
+  </script>
+
 
 </body>
 

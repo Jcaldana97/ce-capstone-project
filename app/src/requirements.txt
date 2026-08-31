@@ -1,2 +1,4 @@
-Flask
-gunicorn
+# requirements.txt
+flask
+structlog
+boto3
