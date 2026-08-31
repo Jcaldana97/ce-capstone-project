@@ -61,5 +61,5 @@ module "compute" {
   app_subnet_ids           = module.vpc_dev.app_subnet_ids
   security_group_app_id    = module.security_groups.app_security_group_id
   alb_target_group_app_arn = module.alb.alb_target_group_app_arn
-  key_name                 = bootcamp-week2-key
+  key_name                 = var.key_name
 }
