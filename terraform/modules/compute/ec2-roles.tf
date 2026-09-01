@@ -49,18 +49,18 @@ resource "aws_iam_role_policy" "app_cloudwatch_logs" {
   role = aws_iam_role.app.id
 
   policy = jsonencode({
-    "Version": "2012-10-17",
+    "Version" : "2012-10-17",
 
-    "Statement": [
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents",
           "logs:DescribeLogStreams"
         ],
-        "Resource": "arn:aws:logs:*:*:*"
+        "Resource" : "arn:aws:logs:*:*:*"
       }
     ]
   })
