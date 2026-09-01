@@ -38,6 +38,17 @@ locals {
   }
 }
 
+resource "aws_cloudwatch_log_group" "application" {
+  name              = var.application_log_group_name
+  retention_in_days = 30
+
+  tags = {
+    Name        = var.application_log_group_name
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
+
 resource "aws_cloudwatch_log_metric_filter" "application" {
   for_each = local.application_metrics
 
