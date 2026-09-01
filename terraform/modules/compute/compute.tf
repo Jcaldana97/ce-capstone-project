@@ -70,9 +70,19 @@ resource "aws_launch_template" "app" {
     # Update packages
     yum update -y
 
+    # Instal SSM Agent
     yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 
     systemctl start amazon-ssm-agent
+
+    # Download  
+    wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+    
+    # Install
+    rpm -U ./amazon-cloudwatch-agent.rpm
+    
+    # Verify installation
+    /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a status -m ec2
 
     # Install Python and required tools
     amazon-linux-extras enable python3.8
@@ -88,6 +98,13 @@ resource "aws_launch_template" "app" {
       /tmp/app.zip
 
     unzip -o /tmp/app.zip -d /opt/app
+
+    # Configure and Run CloudWatch Agent
+    nano /opt/aws/amazon-cloudwatch-agent/etc/config.json
+
+    cp /opt/app/config/cloudwatch-agent-config.json /opt/aws/amazon-cloudwatch-agent/etc/config.json
+
+    /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/etc/config.json
     
     # Create Python virtual environment
     python3.8 -m venv /opt/app/venv

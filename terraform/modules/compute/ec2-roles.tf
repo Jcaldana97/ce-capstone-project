@@ -44,6 +44,28 @@ resource "aws_iam_role_policy" "app_s3" {
   })
 }
 
+resource "aws_iam_role_policy" "app_cloudwatch_logs" {
+  name = "${var.project_name}-app-cloudwatch_logs"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams"
+        ],
+        "Resource" : "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
   role       = aws_iam_role.app.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"

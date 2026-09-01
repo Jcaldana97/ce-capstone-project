@@ -12,7 +12,7 @@ import urllib.request
 # Configuration
 # =========================================================
 
-CART_ABANDONMENT_TIMEOUT = 120
+CART_ABANDONMENT_TIMEOUT = 60
 
 CART_MONITORING_INTERVAL = 30
 
@@ -54,6 +54,18 @@ app = Flask(__name__)
 carts = {}
 
 cart_lock = threading.Lock()
+
+# Business metrics are kept in memory and written to application.log
+# through structlog. No CloudWatch API is called by this application.
+business_metrics = {
+    "tickets_sold": 0,
+    "completed_orders": 0,
+    "cancelled_orders": 0,
+    "tickets_by_band_zone": {},
+    "tickets_by_band": {},
+}
+
+metrics_lock = threading.Lock()
 
 
 # =========================================================
@@ -155,6 +167,109 @@ def get_availability_zone():
 
 
 # =========================================================
+# Business Metrics
+# =========================================================
+
+def record_business_metrics(event, *, band=None, zone=None, tickets=0):
+    """Update metrics and write them to application.log via structlog."""
+    with metrics_lock:
+        if event == "order_completed":
+            business_metrics["tickets_sold"] += tickets
+            business_metrics["completed_orders"] += 1
+
+            if band:
+                business_metrics["tickets_by_band"][band] = (
+                    business_metrics["tickets_by_band"].get(band, 0) + tickets
+                )
+
+                if zone:
+                    by_zone = business_metrics["tickets_by_band_zone"]
+                    if band not in by_zone:
+                        by_zone[band] = {}
+                    by_zone[band][zone] = (
+                        by_zone[band].get(zone, 0) + tickets
+                    )
+
+        elif event == "order_cancelled":
+            business_metrics["cancelled_orders"] += 1
+
+        total_orders = (
+            business_metrics["completed_orders"]
+            + business_metrics["cancelled_orders"]
+        )
+
+        cancellation_rate = (
+            business_metrics["cancelled_orders"] / total_orders * 100
+            if total_orders else 0
+        )
+
+        logger.info(
+            "business_metric",
+            metric_name="TicketsSoldSoFar",
+            value=business_metrics["tickets_sold"],
+        )
+        logger.info(
+            "business_metric",
+            metric_name="CompletedOrders",
+            value=business_metrics["completed_orders"],
+        )
+        logger.info(
+            "business_metric",
+            metric_name="CancelledOrders",
+            value=business_metrics["cancelled_orders"],
+        )
+        logger.info(
+            "business_metric",
+            metric_name="CartAbandonmentRate",
+            value=round(cancellation_rate, 2),
+            unit="Percent",
+        )
+
+        for metric_band, zones in business_metrics["tickets_by_band_zone"].items():
+            for metric_zone, metric_tickets in zones.items():
+                logger.info(
+                    "business_metric",
+                    metric_name="TicketsSoldByBandAndZone",
+                    band=metric_band,
+                    zone=metric_zone,
+                    value=metric_tickets,
+                )
+
+        for metric_band, metric_tickets in business_metrics["tickets_by_band"].items():
+            logger.info(
+                "business_metric",
+                metric_name="TicketsSoldByBand",
+                band=metric_band,
+                value=metric_tickets,
+            )
+
+
+def cancel_cart(cart_id, correlation_id):
+    """Cancel an active cart and record it as an abandoned order."""
+    with cart_lock:
+        cart = carts.get(cart_id)
+
+        if not cart:
+            return False, "cart not found"
+
+        if cart["status"] != "active":
+            return False, f"cart is already {cart['status']}"
+
+        cart["status"] = "abandoned"
+        cart["updated_at"] = time.time()
+
+        logger.info(
+            "cart_abandoned",
+            correlation_id=correlation_id,
+            cart_id=cart_id,
+            reason="session_timeout",
+        )
+
+    record_business_metrics("order_cancelled")
+    return True, None
+
+
+# =========================================================
 # Cart Monitoring
 # =========================================================
 
@@ -187,8 +302,10 @@ def monitor_carts():
                         logger.info(
                             "cart_abandoned",
                             cart_id=cart["cart_id"],
-                            user_id=cart["user_id"]
+                            reason="timeout_monitor",
                         )
+
+                        record_business_metrics("order_cancelled")
 
 
                 total_carts = len(carts)
@@ -464,6 +581,34 @@ def create_cart():
             correlation_id
 
     }, 201
+
+
+@app.route("/cart/<cart_id>/cancel", methods=["POST"])
+def cancel_cart_route(cart_id):
+    correlation_id = request.headers.get(
+        "X-Correlation-ID",
+        str(uuid.uuid4())
+    )
+
+    cancelled, error_message = cancel_cart(
+        cart_id,
+        correlation_id,
+    )
+
+    if not cancelled:
+        status_code = 404 if error_message == "cart not found" else 400
+
+        return {
+            "status": "error",
+            "message": error_message,
+            "correlation_id": correlation_id,
+        }, status_code
+
+    return {
+        "status": "cancelled",
+        "cart_id": cart_id,
+        "correlation_id": correlation_id,
+    }, 200
 
 
 # =========================================================
@@ -789,6 +934,13 @@ def create_order():
     # Personal/payment information is not returned.
     # -----------------------------------------------------
 
+    record_business_metrics(
+        "order_completed",
+        band=concert,
+        zone=ticket_location,
+        tickets=items,
+    )
+
     return {
 
         "status":
@@ -842,7 +994,12 @@ def cart_abandonment_metric():
         )
 
 
-    if total_carts == 0:
+    completed_or_cancelled = (
+        completed_carts +
+        abandoned_carts
+    )
+
+    if completed_or_cancelled == 0:
 
         abandonment_rate = 0
 
@@ -850,7 +1007,7 @@ def cart_abandonment_metric():
 
         abandonment_rate = (
             abandoned_carts /
-            total_carts
+            completed_or_cancelled
         ) * 100
 
 
