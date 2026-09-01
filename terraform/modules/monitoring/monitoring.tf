@@ -64,7 +64,7 @@ resource "aws_cloudwatch_metric_alarm" "unhealthy_targets" {
   treat_missing_data = "notBreaching"
 
   alarm_actions = [
-    aws_sns_topic.alerts.arn
+    aws_sns_topic.topic.arn
   ]
 }
 
@@ -91,10 +91,10 @@ resource "aws_cloudwatch_metric_alarm" "asg_cpu" {
   treat_missing_data = "notBreaching"
 
   alarm_actions = [
-    aws_sns_topic.alerts.arn
+    aws_sns_topic.topic.arn
   ]
 
   ok_actions = [
-    aws_sns_topic.alerts.arn
+    aws_sns_topic.topic.arn
   ]
 }
