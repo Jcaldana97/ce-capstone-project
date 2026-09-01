@@ -66,7 +66,7 @@ resource "aws_iam_role_policy" "app_cloudwatch_logs" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
+resource "aws_iam_role_policy_attachment" "cloudwatch_logs_instance" {
   role       = aws_iam_role.app.name
   policy_arn = aws_iam_role_policy.app_cloudwatch_logs.arn
 }
