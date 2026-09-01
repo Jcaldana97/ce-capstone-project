@@ -1,36 +1,36 @@
 name: Terraform CD
- 
+
 on:
   push:
     branches:
       - main
       - dev
- 
+
 permissions:
   contents: read
- 
+
 env:
   TF_VERSION: "1.13.1"
   AWS_REGION: "us-east-1"
- 
+
 jobs:
   terraform-apply:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
     environment: production
-    defaults: 
-      run: 
+    defaults:
+      run:
         working-directory: ./terraform
- 
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
- 
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
- 
+
       - name: Terraform Init
         run: terraform init
         env:
@@ -39,13 +39,16 @@ jobs:
 
       - name: Terraform Force Unlock
         run: terraform force-unlock -force a693525e-1801-e332-6d15-9c44a2737fc1
- 
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Terraform Plan
         run: terraform plan -input=false -no-color
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
- 
+
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false -no-color
         env:
