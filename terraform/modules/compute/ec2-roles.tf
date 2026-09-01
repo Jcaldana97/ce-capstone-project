@@ -45,6 +45,7 @@ resource "aws_iam_role_policy" "app_s3" {
 }
 
 resource "aws_iam_instance_profile" "app" {
-  name = "${var.project_name}-app-profile"
-  role = aws_iam_role.app.name
+  name       = "${var.project_name}-app-profile"
+  role       = aws_iam_role.app.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
