@@ -50,6 +50,11 @@ variable "app_cpu_target" {
   default     = 70
 }
 
+variable "vpc_id" {
+  description = "VPC ID"
+  type        = string
+}
+
 variable "app_subnet_ids" {
   description = "Private Subnet ID where the app resides"
   type        = list(string)
