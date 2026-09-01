@@ -9,6 +9,12 @@ variable "environment" {
   default     = "dev"
 }
 
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-east-1"
+}
+
 variable "app_instance_count" {
   description = "Number of app instances"
   type        = number
@@ -44,8 +50,13 @@ variable "app_cpu_target" {
   default     = 70
 }
 
+variable "vpc_id" {
+  description = "VPC ID"
+  type        = string
+}
+
 variable "app_subnet_ids" {
-  description = "Public Subnet ID where the app resides"
+  description = "Private Subnet ID where the app resides"
   type        = list(string)
 }
 
@@ -61,6 +72,11 @@ variable "alb_target_group_app_arn" {
 
 variable "key_name" {
   description = "EC2 key pair name"
+  type        = string
+}
+
+variable "security_group_ssm_endpoint_id" {
+  description = "SSM VPC Endpoint Security Group"
   type        = string
 }
 
