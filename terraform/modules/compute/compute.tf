@@ -28,10 +28,10 @@ data "archive_file" "app" {
 
 
 resource "aws_s3_bucket" "app" {
-  bucket_prefix = "${var.project_name}-app-"
+  bucket = "${var.project_name}-app-julioaldana"
 
   tags = {
-    Name        = "${var.project_name}-app"
+    Name        = "${var.project_name}-app-julioaldana"
     Environment = var.environment
   }
 }
