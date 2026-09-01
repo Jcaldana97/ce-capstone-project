@@ -46,3 +46,15 @@ variable "unhealthy_host_threshold" {
   type        = number
   default     = 1
 }
+
+variable "application_log_group_name" {
+  description = "CloudWatch Log Group containing application.log entries"
+  type        = string
+  default     = "/capstone/application/api"
+}
+
+variable "metric_namespace" {
+  description = "CloudWatch namespace for application metrics"
+  type        = string
+  default     = "Tickets/Application"
+}
