@@ -95,6 +95,7 @@ resource "aws_launch_template" "app" {
     # Install Python dependencies
     /opt/app/venv/bin/pip install --upgrade pip
     /opt/app/venv/bin/pip install -r /opt/app/requirements.txt
+    /opt/app/venv/bin/pip install gunicorn
 
     # Create systemd service
     cat > /etc/systemd/system/flask-app.service <<SERVICE
