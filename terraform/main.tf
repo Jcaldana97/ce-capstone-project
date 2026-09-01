@@ -70,3 +70,15 @@ module "compute" {
   key_name                       = var.key_name
   security_group_ssm_endpoint_id = module.security_groups.ssm_security_group_id
 }
+
+module "monitoring" {
+  source = "./modules/monitoring"
+
+  project_name            = var.project_name
+  environment             = var.environment
+  aws_region              = var.aws_region
+  subscription_email      = var.subscription_email
+  alb_arn_suffix          = module.alb.alb_arn_suffix
+  target_group_arn_suffix = module.alb.target_group_arn_suffix
+  autoscaling_group_name  = module.compute.app_autoscaling_group_name
+}
