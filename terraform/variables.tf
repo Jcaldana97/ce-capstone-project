@@ -28,6 +28,11 @@ variable "availability_zones" {
   default     = ["us-east-1a", "us-east-1b"]
 }
 
+variable "vpc_id" {
+  description = "VPC ID"
+  type        = string
+}
+
 variable "public_subnet_cidrs" {
   description = "Public subnet CIDRs"
   type        = list(string)

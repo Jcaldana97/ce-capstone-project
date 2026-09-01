@@ -55,15 +55,18 @@ module "alb" {
 module "compute" {
   source = "./modules/compute"
 
-  project_name             = var.project_name
-  environment              = var.environment
-  app_instance_count       = var.app_instance_count
-  app_min_size             = var.app_min_size
-  app_max_size             = var.app_max_size
-  app_instance_type        = var.app_instance_type
-  app_cpu_target           = var.app_cpu_target
-  app_subnet_ids           = module.vpc_dev.app_subnet_ids
-  security_group_app_id    = module.security_groups.app_security_group_id
-  alb_target_group_app_arn = module.alb.alb_target_group_app_arn
-  key_name                 = var.key_name
+  project_name                   = var.project_name
+  environment                    = var.environment
+  aws_region                     = var.aws_region
+  app_instance_count             = var.app_instance_count
+  app_min_size                   = var.app_min_size
+  app_max_size                   = var.app_max_size
+  app_instance_type              = var.app_instance_type
+  app_cpu_target                 = var.app_cpu_target
+  vpc_id                         = module.vpc_dev.vpc_id
+  app_subnet_ids                 = module.vpc_dev.app_subnet_ids
+  security_group_app_id          = module.security_groups.app_security_group_id
+  alb_target_group_app_arn       = module.alb.alb_target_group_app_arn
+  key_name                       = var.key_name
+  security_group_ssm_endpoint_id = module.security_groups.ssm_security_group_id
 }

@@ -12,3 +12,8 @@ output "data_security_group_id" {
   description = "Data Security Group ID"
   value       = aws_security_group.data.id
 }
+
+output "ssm_security_group_id" {
+  description = "SSM VPC Endpoint Security Group"
+  value       = aws_security_group.ssm_endpoint.id
+}
