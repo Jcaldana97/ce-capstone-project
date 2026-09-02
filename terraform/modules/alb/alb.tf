@@ -8,6 +8,7 @@ resource "aws_lb" "main" {
   tags = {
     Name        = "${var.project_name}-alb"
     Environment = var.environment
+    Role        = "app"
   }
 }
 
@@ -30,7 +31,9 @@ resource "aws_lb_target_group" "app" {
   }
 
   tags = {
-    Name = "${var.project_name}-app-tg"
+    Name        = "${var.project_name}-app-tg"
+    Environment = var.environment
+    Role        = "app"
   }
 }
 

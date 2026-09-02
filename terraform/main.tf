@@ -10,6 +10,15 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+
+  default_tags {
+    tags = {
+      Environment = var.environment
+      Owner       = var.owner
+      Project     = var.project_name
+      CostCenter  = var.cost_center
+    }
+  }
 }
 
 data "aws_availability_zones" "available" {
