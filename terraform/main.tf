@@ -82,3 +82,12 @@ module "monitoring" {
   target_group_arn_suffix = module.alb.target_group_arn_suffix
   autoscaling_group_name  = module.compute.app_autoscaling_group_name
 }
+
+module "database" {
+  source = "./modules/database"
+
+  project_name    = var.project_name
+  aws_region      = var.aws_region
+  vpc_id          = module.vpc_dev.vpc_id
+  data_subnet_ids = module.networking.data_subnet_ids
+}
