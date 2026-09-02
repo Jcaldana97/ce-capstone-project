@@ -87,13 +87,13 @@ resource "aws_cloudwatch_log_metric_filter" "application" {
 }
 
 # Dashboards creation
-resource "aws_cloudwatch_dashboard" "application" {
+resource "aws_cloudwatch_dashboard" "technical_dashboard" {
   dashboard_name = "CapstoneTechnicalDashboard"
 
   dashboard_body = local.technical_dashboard_body
 }
 
-resource "aws_cloudwatch_dashboard" "application" {
+resource "aws_cloudwatch_dashboard" "business_dashboard" {
   dashboard_name = "CapstoneBusinessDashboard"
 
   dashboard_body = local.business_dashboard_body
