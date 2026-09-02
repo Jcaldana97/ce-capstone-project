@@ -80,5 +80,9 @@ variable "security_group_ssm_endpoint_id" {
   type        = string
 }
 
+variable "database_table_arn" {
+  description = "ARN of DynamoDB Database table"
+  type        = string
+}
 
 

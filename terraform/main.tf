@@ -52,6 +52,15 @@ module "alb" {
   alb_public_subnets    = module.vpc_dev.public_subnet_ids
 }
 
+module "database" {
+  source = "./modules/database"
+
+  project_name    = var.project_name
+  aws_region      = var.aws_region
+  vpc_id          = module.vpc_dev.vpc_id
+  data_subnet_ids = module.networking.data_subnet_ids
+}
+
 module "compute" {
   source = "./modules/compute"
 
@@ -69,6 +78,7 @@ module "compute" {
   alb_target_group_app_arn       = module.alb.alb_target_group_app_arn
   key_name                       = var.key_name
   security_group_ssm_endpoint_id = module.security_groups.ssm_security_group_id
+  database_table_arn             = module.database.table_arn
 }
 
 module "monitoring" {
@@ -81,13 +91,4 @@ module "monitoring" {
   alb_arn_suffix          = module.alb.alb_arn_suffix
   target_group_arn_suffix = module.alb.target_group_arn_suffix
   autoscaling_group_name  = module.compute.app_autoscaling_group_name
-}
-
-module "database" {
-  source = "./modules/database"
-
-  project_name    = var.project_name
-  aws_region      = var.aws_region
-  vpc_id          = module.vpc_dev.vpc_id
-  data_subnet_ids = module.networking.data_subnet_ids
 }
