@@ -66,6 +66,29 @@ resource "aws_iam_role_policy" "app_cloudwatch_logs" {
   })
 }
 
+resource "aws_iam_role_policy" "carts_table_access" {
+  name = "${var.project_name}-dynamodb-access"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ]
+      Resource = [
+        module.carts_table.table_arn,
+        "${module.carts_table.table_arn}/index/*"
+      ]
+    }]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
   role       = aws_iam_role.app.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
