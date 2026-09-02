@@ -66,6 +66,24 @@ resource "aws_iam_role_policy" "app_cloudwatch_logs" {
   })
 }
 
+resource "aws_iam_role_policy" "app_cloudwatch_metrics" {
+  name = "${var.project_name}-app-cloudwatch-metrics"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "cloudwatch:PutMetricData"
+        ],
+        "Resource" : "*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy" "carts_table_access" {
   name = "${var.project_name}-dynamodb-access"
   role = aws_iam_role.app.id

@@ -7,7 +7,7 @@
             "width": 24,
             "height": 1,
             "properties": {
-                "markdown": "## 💲 Ticket Service "
+                "markdown": "## Ticket Service "
             }
         },
         {
@@ -18,13 +18,13 @@
             "height": 4,
             "properties": {
                 "metrics": [
-                    [ "Ticket/Application", "TicketsSoldSoFar", { "region": "${aws_region}" } ]
+                    [ "ConcertTicketService", "TicketsSold", { "region": "${aws_region}" } ]
                 ],
                 "sparkline": true,
                 "view": "singleValue",
                 "region": "${aws_region}",
                 "period": 60,
-                "stat": "Maximum",
+                "stat": "Sum",
                 "liveData": true,
                 "title": "TicketsPurchased"
             }
@@ -37,13 +37,13 @@
             "height": 4,
             "properties": {
                 "metrics": [
-                    [ "Ticket/Application", "CompletedOrders", { "region": "${aws_region}" } ]
+                    [ "ConcertTicketService", "CompletedOrders", { "region": "${aws_region}" } ]
                 ],
                 "sparkline": true,
                 "view": "singleValue",
                 "region": "${aws_region}",
                 "period": 60,
-                "stat": "Maximum",
+                "stat": "Sum",
                 "liveData": true,
                 "title": "CompletedOrders"
             }
@@ -56,13 +56,13 @@
             "height": 4,
             "properties": {
                 "metrics": [
-                    [ "Ticket/Application", "CancelledOrders", { "region": "${aws_region}" } ]
+                    [ "ConcertTicketService", "CancelledOrders", { "region": "${aws_region}" } ]
                 ],
                 "sparkline": true,
                 "view": "singleValue",
                 "region": "${aws_region}",
                 "period": 60,
-                "stat": "Maximum",
+                "stat": "Sum",
                 "liveData": true,
                 "title": "CancelledOrders"
             }
@@ -75,7 +75,7 @@
             "height": 12,
             "properties": {
                 "metrics": [
-                    [ "Ticket/Application", "CartAbandonmentRate", { "region": "${aws_region}" } ]
+                    [ "ConcertTicketService", "CartAbandonmentRate", { "region": "${aws_region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -92,7 +92,7 @@
             "width": 24,
             "height": 1,
             "properties": {
-                "markdown": "## 💲 Sales by Band"
+                "markdown": "## Sales by Band"
             }
         },
         {
@@ -103,12 +103,17 @@
             "height": 12,
             "properties": {
                 "metrics": [
-                    [ "Ticket/Application", "OrderCount", { "region": "${aws_region}", "label": "Coldplay" } ]
+                    [ "ConcertTicketService", "TicketsSoldByBand", "Band", "Coldplay", { "region": "${aws_region}", "label": "Coldplay" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBand", "Band", "Tame Impala", { "region": "${aws_region}", "label": "Tame Impala" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBand", "Band", "The Strokes", { "region": "${aws_region}", "label": "The Strokes" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBand", "Band", "Bad Bunny", { "region": "${aws_region}", "label": "Bad Bunny" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBand", "Band", "Twenty One Pilots", { "region": "${aws_region}", "label": "Twenty One Pilots" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBand", "Band", "Caloncho", { "region": "${aws_region}", "label": "Caloncho" } ]
                 ],
                 "view": "pie",
                 "region": "${aws_region}",
                 "period": 300,
-                "stat": "Average",
+                "stat": "Sum",
                 "title": "TicketsPerBand"
             }
         },
@@ -120,16 +125,16 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Coldplay", "Zone", "Standing", { "region": "${aws_region}", "label": "Standing" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Coldplay", "Zone", "Upper Tier", { "region": "${aws_region}", "label": "Upper Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Coldplay", "Zone", "Lower Tier", { "region": "${aws_region}", "label": "Lower Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Coldplay", "Zone", "VIP - Front Stage", { "region": "${aws_region}", "label": "VIP - Front Stage" } ]
                 ],
                 "view": "bar",
                 "region": "${aws_region}",
                 "period": 300,
                 "title": "Coldplay - Tickets",
-                "stat": "Average"
+                "stat": "Sum"
             }
         },
         {
@@ -140,16 +145,16 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Tame Impala", "Zone", "Standing", { "region": "${aws_region}", "label": "Standing" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Tame Impala", "Zone", "Upper Tier", { "region": "${aws_region}", "label": "Upper Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Tame Impala", "Zone", "Lower Tier", { "region": "${aws_region}", "label": "Lower Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Tame Impala", "Zone", "VIP - Front Stage", { "region": "${aws_region}", "label": "VIP - Front Stage" } ]
                 ],
                 "view": "bar",
                 "region": "${aws_region}",
                 "period": 300,
                 "title": "Tame Impala - Tickets",
-                "stat": "Average"
+                "stat": "Sum"
             }
         },
         {
@@ -160,16 +165,16 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "The Strokes", "Zone", "Standing", { "region": "${aws_region}", "label": "Standing" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "The Strokes", "Zone", "Upper Tier", { "region": "${aws_region}", "label": "Upper Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "The Strokes", "Zone", "Lower Tier", { "region": "${aws_region}", "label": "Lower Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "The Strokes", "Zone", "VIP - Front Stage", { "region": "${aws_region}", "label": "VIP - Front Stage" } ]
                 ],
                 "view": "bar",
                 "region": "${aws_region}",
                 "period": 300,
                 "title": "The Strokes - Tickets",
-                "stat": "Average"
+                "stat": "Sum"
             }
         },
         {
@@ -180,16 +185,16 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Bad Bunny", "Zone", "Standing", { "region": "${aws_region}", "label": "Standing" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Bad Bunny", "Zone", "Upper Tier", { "region": "${aws_region}", "label": "Upper Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Bad Bunny", "Zone", "Lower Tier", { "region": "${aws_region}", "label": "Lower Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Bad Bunny", "Zone", "VIP - Front Stage", { "region": "${aws_region}", "label": "VIP - Front Stage" } ]
                 ],
                 "view": "bar",
                 "region": "${aws_region}",
                 "period": 300,
                 "title": "Bad Bunny - Tickets",
-                "stat": "Average"
+                "stat": "Sum"
             }
         },
         {
@@ -200,16 +205,16 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Twenty One Pilots", "Zone", "Standing", { "region": "${aws_region}", "label": "Standing" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Twenty One Pilots", "Zone", "Upper Tier", { "region": "${aws_region}", "label": "Upper Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Twenty One Pilots", "Zone", "Lower Tier", { "region": "${aws_region}", "label": "Lower Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Twenty One Pilots", "Zone", "VIP - Front Stage", { "region": "${aws_region}", "label": "VIP - Front Stage" } ]
                 ],
                 "view": "bar",
                 "region": "${aws_region}",
                 "period": 300,
                 "title": "Twenty One Pilots - Tickets",
-                "stat": "Average"
+                "stat": "Sum"
             }
         },
         {
@@ -220,16 +225,16 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
-                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Caloncho", "Zone", "Standing", { "region": "${aws_region}", "label": "Standing" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Caloncho", "Zone", "Upper Tier", { "region": "${aws_region}", "label": "Upper Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Caloncho", "Zone", "Lower Tier", { "region": "${aws_region}", "label": "Lower Tier" } ],
+                    [ "ConcertTicketService", "TicketsSoldByBandAndZone", "Band", "Caloncho", "Zone", "VIP - Front Stage", { "region": "${aws_region}", "label": "VIP - Front Stage" } ]
                 ],
                 "view": "bar",
                 "region": "${aws_region}",
                 "period": 300,
                 "title": "Caloncho - Tickets",
-                "stat": "Average"
+                "stat": "Sum"
             }
         }
     ]
