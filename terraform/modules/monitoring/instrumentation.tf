@@ -40,7 +40,7 @@ locals {
 
 locals {
   technical_dashboard_body = templatefile(
-    "./dashboards/technical-dashboard.json",
+    "${path.module}/dashboards/technical-dashboard.json",
     {
       aws_region              = var.aws_region
       alb_arn_suffix          = var.alb_arn_suffix
@@ -52,7 +52,7 @@ locals {
 
 locals {
   business_dashboard_body = templatefile(
-    "./dashboards/business-dashboard.json",
+    "${path.module}/dashboards/business-dashboard.json",
     {
       aws_region = var.aws_region
     }
