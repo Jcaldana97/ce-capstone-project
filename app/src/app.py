@@ -28,6 +28,34 @@ carts_table = dynamodb.Table(CARTS_TABLE_NAME)
 METRICS_TABLE_NAME = os.getenv("METRICS_TABLE_NAME", "capstone-project-metrics")
 metrics_table = dynamodb.Table(METRICS_TABLE_NAME)
 
+# =========================================================
+# CloudWatch custom metrics
+#
+# Published in addition to (not instead of) the DynamoDB-backed
+# metrics table below. Namespace is configurable via env var.
+# =========================================================
+CLOUDWATCH_NAMESPACE = os.getenv("CLOUDWATCH_NAMESPACE", "ConcertTicketService")
+CLOUDWATCH_REGION = os.getenv("AWS_REGION", "us-east-1")
+cloudwatch = boto3.client("cloudwatch", region_name=CLOUDWATCH_REGION)
+def _put_metric_data(metric_data):
+    """Publish one or more MetricDatum dicts to CloudWatch. Never raises -
+    a CloudWatch outage must not break the request path."""
+    if not metric_data:
+        return
+    try:
+        # PutMetricData accepts at most 1000 MetricDatum per call.
+        for i in range(0, len(metric_data), 1000):
+            cloudwatch.put_metric_data(
+                Namespace=CLOUDWATCH_NAMESPACE,
+                MetricData=metric_data[i:i + 1000],
+            )
+    except ClientError as exc:
+        logger.error("cloudwatch_put_metric_failed", error=str(exc),
+                     metric_names=[m["MetricName"] for m in metric_data])
+    except Exception as exc:
+        logger.error("cloudwatch_put_metric_failed", error=str(exc),
+                     metric_names=[m["MetricName"] for m in metric_data])
+
 
 # =========================================================
 # Structured logging
@@ -188,6 +216,9 @@ def _get_metric(category, detail):
 
 
 def record_business_metrics(event, *, band=None, zone=None, tickets=0):
+    # -------------------------------------------------------------
+    # Existing DynamoDB-backed logic (unchanged)
+    # -------------------------------------------------------------
     if event == "order_completed":
         _increment_metric("GLOBAL", "tickets_sold", tickets)
         _increment_metric("GLOBAL", "completed_orders", 1)
@@ -201,7 +232,62 @@ def record_business_metrics(event, *, band=None, zone=None, tickets=0):
         _increment_metric("GLOBAL", "cancelled_orders", 1)
 
     _log_current_metrics()
-
+    
+    # -------------------------------------------------------------
+    # Also publish the same event data to CloudWatch as custom metrics
+    # -------------------------------------------------------------
+    now = time.time()
+    metric_data = []
+    if event == "order_completed":
+        metric_data.append({
+            "MetricName": "TicketsSold",
+            "Timestamp": now,
+            "Value": tickets,
+            "Unit": "Count",
+        })
+        metric_data.append({
+            "MetricName": "CompletedOrders",
+            "Timestamp": now,
+            "Value": 1,
+            "Unit": "Count",
+        })
+        if band:
+            metric_data.append({
+                "MetricName": "TicketsSoldByBand",
+                "Timestamp": now,
+                "Value": tickets,
+                "Unit": "Count",
+                "Dimensions": [{"Name": "Band", "Value": band}],
+            })
+            if zone:
+                metric_data.append({
+                    "MetricName": "TicketsSoldByBandAndZone",
+                    "Timestamp": now,
+                    "Value": tickets,
+                    "Unit": "Count",
+                    "Dimensions": [
+                        {"Name": "Band", "Value": band},
+                        {"Name": "Zone", "Value": zone},
+                    ],
+                })
+    elif event == "order_cancelled":
+        metric_data.append({
+            "MetricName": "CancelledOrders",
+            "Timestamp": now,
+            "Value": 1,
+            "Unit": "Count",
+        })
+    completed_orders = _get_metric("GLOBAL", "completed_orders")
+    cancelled_orders = _get_metric("GLOBAL", "cancelled_orders")
+    total_orders = completed_orders + cancelled_orders
+    cancellation_rate = (cancelled_orders / total_orders * 100) if total_orders else 0
+    metric_data.append({
+        "MetricName": "CartAbandonmentRate",
+        "Timestamp": now,
+        "Value": cancellation_rate,
+        "Unit": "Percent",
+    })
+    _put_metric_data(metric_data)
 
 def _log_current_metrics():
     tickets_sold = _get_metric("GLOBAL", "tickets_sold")
