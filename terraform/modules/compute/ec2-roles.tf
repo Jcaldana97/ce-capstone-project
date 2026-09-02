@@ -82,8 +82,8 @@ resource "aws_iam_role_policy" "carts_table_access" {
         "dynamodb:Scan"
       ]
       Resource = [
-        database_table_arn,
-        "${database_table_arn}/index/*"
+        var.database_table_arn,
+        "${var.database_table_arn}/index/*"
       ]
     }]
   })

@@ -58,7 +58,7 @@ module "database" {
   project_name    = var.project_name
   aws_region      = var.aws_region
   vpc_id          = module.vpc_dev.vpc_id
-  data_subnet_ids = module.networking.data_subnet_ids
+  data_subnet_ids = module.vpc_dev.data_subnet_ids
 }
 
 module "compute" {
