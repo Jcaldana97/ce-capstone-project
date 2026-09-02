@@ -6,6 +6,8 @@ import threading
 import os
 import socket
 import urllib.request
+import boto3
+from botocore.exceptions import ClientError
 
 
 # =========================================================
@@ -15,6 +17,12 @@ import urllib.request
 CART_ABANDONMENT_TIMEOUT = 60
 
 CART_MONITORING_INTERVAL = 30
+
+CARTS_TABLE_NAME = os.getenv("CARTS_TABLE_NAME", "capstone-project-database")
+CART_TTL_BUFFER_SECONDS = 300  # keep abandoned/completed carts around briefly for metrics/debugging
+
+dynamodb = boto3.resource("dynamodb")
+carts_table = dynamodb.Table(CARTS_TABLE_NAME)
 
 
 # =========================================================
@@ -40,20 +48,6 @@ logger = structlog.get_logger()
 # =========================================================
 
 app = Flask(__name__)
-
-
-# =========================================================
-# In-memory cart storage
-#
-# Demo only.
-#
-# For multiple EC2 instances this should eventually be
-# replaced with DynamoDB, Redis, or another shared datastore.
-# =========================================================
-
-carts = {}
-
-cart_lock = threading.Lock()
 
 # Business metrics are kept in memory and written to application.log
 # through structlog. No CloudWatch API is called by this application.
@@ -244,27 +238,31 @@ def record_business_metrics(event, *, band=None, zone=None, tickets=0):
             )
 
 
-def cancel_cart(cart_id, correlation_id):
-    """Cancel an active cart and record it as an abandoned order."""
-    with cart_lock:
-        cart = carts.get(cart_id)
-
-        if not cart:
-            return False, "cart not found"
-
-        if cart["status"] != "active":
-            return False, f"cart is already {cart['status']}"
-
-        cart["status"] = "abandoned"
-        cart["updated_at"] = time.time()
-
-        logger.info(
-            "cart_abandoned",
-            correlation_id=correlation_id,
-            cart_id=cart_id,
-            reason="session_timeout",
+def cancel_cart(cart_id, correlation_id=None, reason="manual_cancel"):
+    now = int(time.time())
+    try:
+        carts_table.update_item(
+            Key={"cart_id": cart_id},
+            UpdateExpression="SET #status = :abandoned, updated_at = :now",
+            ConditionExpression="attribute_exists(cart_id) AND #status = :active",
+            ExpressionAttributeNames={"#status": "status"},
+            ExpressionAttributeValues={
+                ":abandoned": "abandoned",
+                ":active": "active",
+                ":now": now,
+            },
         )
+    except ClientError as exc:
+        if exc.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            existing = carts_table.get_item(Key={"cart_id": cart_id}).get("Item")
+            if not existing:
+                return False, "cart not found"
+            return False, f"cart is already {existing['status']}"
+        logger.error("cart_cancel_failed", correlation_id=correlation_id,
+                     cart_id=cart_id, error=str(exc))
+        return False, "internal error"
 
+    logger.info("cart_abandoned", correlation_id=correlation_id, cart_id=cart_id, reason=reason)
     record_business_metrics("order_cancelled")
     return True, None
 
@@ -274,102 +272,30 @@ def cancel_cart(cart_id, correlation_id):
 # =========================================================
 
 def monitor_carts():
-
     while True:
-
         try:
-
-            now = time.time()
-
+            cutoff = int(time.time()) - CART_ABANDONMENT_TIMEOUT
             newly_abandoned = 0
 
-
-            with cart_lock:
-
-                for cart in carts.values():
-
-                    if (
-                        cart["status"] == "active"
-                        and
-                        now - cart["updated_at"]
-                        >= CART_ABANDONMENT_TIMEOUT
-                    ):
-
-                        cart["status"] = "abandoned"
-
-                        newly_abandoned += 1
-
-                        logger.info(
-                            "cart_abandoned",
-                            cart_id=cart["cart_id"],
-                            reason="timeout_monitor",
-                        )
-
-                        record_business_metrics("order_cancelled")
-
-
-                total_carts = len(carts)
-
-
-                abandoned_carts = sum(
-                    1
-                    for cart in carts.values()
-                    if cart["status"] == "abandoned"
-                )
-
-
-                completed_carts = sum(
-                    1
-                    for cart in carts.values()
-                    if cart["status"] == "completed"
-                )
-
-
-                active_carts = sum(
-                    1
-                    for cart in carts.values()
-                    if cart["status"] == "active"
-                )
-
-
-            if total_carts == 0:
-
-                abandonment_rate = 0
-
-            else:
-
-                abandonment_rate = (
-                    abandoned_carts /
-                    total_carts
-                ) * 100
-
-
-            logger.info(
-                "cart_abandonment_metric",
-                metric_name="CartAbandonmentRate",
-                total_carts=total_carts,
-                newly_abandoned=newly_abandoned,
-                abandoned_carts=abandoned_carts,
-                completed_carts=completed_carts,
-                active_carts=active_carts,
-                abandonment_rate=round(
-                    abandonment_rate,
-                    2
-                )
+            response = carts_table.query(
+                IndexName="status-updated_at-index",
+                KeyConditionExpression="#status = :active AND updated_at <= :cutoff",
+                ExpressionAttributeNames={"#status": "status"},
+                ExpressionAttributeValues={":active": "active", ":cutoff": cutoff},
             )
 
+            for cart in response.get("Items", []):
+                cancelled, _ = cancel_cart(cart["cart_id"], reason="timeout_monitor")
+                if cancelled:
+                    newly_abandoned += 1
+
+            logger.info("cart_abandonment_metric", metric_name="CartAbandonmentRate",
+                        newly_abandoned=newly_abandoned)
 
         except Exception as exc:
+            logger.error("cart_monitoring_failed", error=str(exc))
 
-            logger.error(
-                "cart_monitoring_failed",
-                error=str(exc)
-            )
-
-
-        time.sleep(
-            CART_MONITORING_INTERVAL
-        )
+        time.sleep(CART_MONITORING_INTERVAL)
 
 
 # =========================================================
@@ -554,9 +480,24 @@ def create_cart():
     }
 
 
-    with cart_lock:
+    now = int(time.time())
 
-        carts[cart_id] = cart
+    cart = {
+        "cart_id": cart_id,
+        "user_id": data.get("user_id"),
+        "items": data.get("items", 0),
+        "created_at": now,
+        "updated_at": now,
+        "status": "active",
+        "ttl": now + CART_ABANDONMENT_TIMEOUT + CART_TTL_BUFFER_SECONDS,
+    }
+
+    try:
+        carts_table.put_item(Item=cart)
+    except ClientError as exc:
+        logger.error("cart_create_failed", correlation_id=correlation_id, error=str(exc))
+        return {"status": "error", "message": "unable to create cart",
+                "correlation_id": correlation_id}, 500
 
 
     # Do not log user_id or other personal information.
@@ -820,11 +761,34 @@ def create_order():
     # Complete cart
     # -----------------------------------------------------
 
-    with cart_lock:
-
-        cart = carts.get(
-            cart_id
+    try:
+        carts_table.update_item(
+            Key={"cart_id": cart_id},
+            UpdateExpression="SET #status = :completed, updated_at = :now",
+            ConditionExpression="attribute_exists(cart_id) AND #status = :active",
+            ExpressionAttributeNames={"#status": "status"},
+            ExpressionAttributeValues={
+                ":completed": "completed",
+                ":active": "active",
+                ":now": int(time.time()),
+            },
         )
+
+    except ClientError as exc:
+
+        if exc.response["Error"]["Code"] == "ConditionalCheckFailedException":
+            existing = carts_table.get_item(Key={"cart_id": cart_id}).get("Item")
+
+            if not existing:
+                return {"status": "error", "message": "cart not found",
+                        "correlation_id": correlation_id}, 404
+
+            return {"status": "error", "message": f"cart is already {existing['status']}",
+                    "correlation_id": correlation_id}, 400
+
+        logger.error("order_cart_complete_failed", correlation_id=correlation_id, cart_id=cart_id, error=str(exc))
+        return {"status": "error", "message": "internal error",
+                "correlation_id": correlation_id}, 500
 
 
         if not cart:
@@ -964,52 +928,46 @@ def create_order():
 # Kept for monitoring.
 # Removed from the UI.
 # =========================================================
+def _count_carts_by_status(status):
+    count = 0
+    query_kwargs = {
+        "IndexName": "status-updated_at-index",
+        "KeyConditionExpression": "#status = :status",
+        "ExpressionAttributeNames": {"#status": "status"},
+        "ExpressionAttributeValues": {":status": status},
+        "Select": "COUNT",
+    }
+
+    response = carts_table.query(**query_kwargs)
+    count += response["Count"]
+
+    while "LastEvaluatedKey" in response:
+        response = carts_table.query(
+            **query_kwargs,
+            ExclusiveStartKey=response["LastEvaluatedKey"]
+        )
+        count += response["Count"]
+
+    return count
 
 @app.route("/metrics/cart-abandonment")
 def cart_abandonment_metric():
 
-    with cart_lock:
+    try:
+        abandoned_carts = _count_carts_by_status("abandoned")
+        completed_carts = _count_carts_by_status("completed")
+        active_carts = _count_carts_by_status("active")
+    except ClientError as exc:
+        logger.error("cart_abandonment_metric_failed", error=str(exc))
+        return {"status": "error", "message": "unable to compute metric"}, 500
 
-        total_carts = len(carts)
-
-
-        abandoned_carts = sum(
-            1
-            for cart in carts.values()
-            if cart["status"] == "abandoned"
-        )
-
-
-        completed_carts = sum(
-            1
-            for cart in carts.values()
-            if cart["status"] == "completed"
-        )
-
-
-        active_carts = sum(
-            1
-            for cart in carts.values()
-            if cart["status"] == "active"
-        )
-
-
-    completed_or_cancelled = (
-        completed_carts +
-        abandoned_carts
-    )
+    total_carts = abandoned_carts + completed_carts + active_carts
+    completed_or_cancelled = completed_carts + abandoned_carts
 
     if completed_or_cancelled == 0:
-
         abandonment_rate = 0
-
     else:
-
-        abandonment_rate = (
-            abandoned_carts /
-            completed_or_cancelled
-        ) * 100
-
+        abandonment_rate = (abandoned_carts / completed_or_cancelled) * 100
 
     logger.info(
         "cart_abandonment_metric_requested",
@@ -1018,36 +976,16 @@ def cart_abandonment_metric():
         abandoned_carts=abandoned_carts,
         completed_carts=completed_carts,
         active_carts=active_carts,
-        abandonment_rate=round(
-            abandonment_rate,
-            2
-        )
+        abandonment_rate=round(abandonment_rate, 2)
     )
 
-
     return {
-
-        "metric":
-            "CartAbandonmentRate",
-
-        "abandoned_carts":
-            abandoned_carts,
-
-        "completed_carts":
-            completed_carts,
-
-        "active_carts":
-            active_carts,
-
-        "total_carts":
-            total_carts,
-
-        "abandonment_rate_percent":
-            round(
-                abandonment_rate,
-                2
-            )
-
+        "metric": "CartAbandonmentRate",
+        "abandoned_carts": abandoned_carts,
+        "completed_carts": completed_carts,
+        "active_carts": active_carts,
+        "total_carts": total_carts,
+        "abandonment_rate_percent": round(abandonment_rate, 2)
     }
 
 
