@@ -1,34 +1,15 @@
-variable "project_name" {
-  description = "Project identifier"
-  type        = string
-  default     = "capstone-project"
-}
-
-variable "aws_region" {
-  description = "AWS region"
-  type        = string
-}
-
-variable "vpc_id" {
-  description = "VPC ID"
-  type        = string
-}
-
-variable "data_route_table_id" {
-  description = "Private Rout Table IDs where the data resides"
-  type        = string
+variable "table_name" {
+  type = string
 }
 
 variable "hash_key" {
-  type    = string
-  default = "cart_id"
+  type = string
 }
 
 variable "billing_mode" {
   type    = string
   default = "PAY_PER_REQUEST"
 }
-
 
 variable "ttl_attribute" {
   type    = string
@@ -38,4 +19,23 @@ variable "ttl_attribute" {
 variable "tags" {
   type    = map(string)
   default = {}
+}
+
+variable "range_key" {
+  type    = string
+  default = null
+}
+
+variable "enable_ttl" {
+  type    = bool
+  default = false
+}
+
+variable "global_secondary_index" {
+  type = object({
+    name      = string
+    hash_key  = string
+    range_key = string
+  })
+  default = null
 }

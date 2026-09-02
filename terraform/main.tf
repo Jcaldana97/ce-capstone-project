@@ -52,14 +52,48 @@ module "alb" {
   alb_public_subnets    = module.vpc_dev.public_subnet_ids
 }
 
-module "database" {
-  source = "./modules/database"
+module "vpc-endpoint-db" {
+  source = "./modules/vpc-endpoints"
 
   project_name        = var.project_name
   aws_region          = var.aws_region
   vpc_id              = module.vpc_dev.vpc_id
   data_route_table_id = module.vpc_dev.data_route_table_id
 }
+
+module "carts_table" {
+  source = "./modules/database"
+
+  table_name    = "capstone-project-database"
+  hash_key      = "cart_id"
+  enable_ttl    = true
+  ttl_attribute = "ttl"
+
+  global_secondary_index = {
+    name      = "status-updated_at-index"
+    hash_key  = "status"
+    range_key = "updated_at"
+  }
+
+  tags = {
+    Environment = "production"
+    Application = "concert-ticket-service"
+  }
+}
+
+module "metrics_table" {
+  source = "./modules/database"
+
+  table_name = "capstone-project-metrics"
+  hash_key   = "category"
+  range_key  = "detail"
+
+  tags = {
+    Environment = "production"
+    Application = "concert-ticket-service"
+  }
+}
+
 
 module "compute" {
   source = "./modules/compute"
@@ -78,7 +112,8 @@ module "compute" {
   alb_target_group_app_arn       = module.alb.alb_target_group_app_arn
   key_name                       = var.key_name
   security_group_ssm_endpoint_id = module.security_groups.ssm_security_group_id
-  database_table_arn             = module.database.table_arn
+  carts_table_arn                = module.carts_table.table_arn
+  metrics_table_arn              = module.metrics_table.table_arn
 }
 
 module "monitoring" {
