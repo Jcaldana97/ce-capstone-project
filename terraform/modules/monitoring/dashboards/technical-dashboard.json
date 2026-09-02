@@ -191,7 +191,7 @@
             "type": "text",
             "x": 0,
             "y": 17,
-            "width": 24,
+            "width": 6,
             "height": 1,
             "properties": {
                 "markdown": "## 💻 EC2 Resource Utilization"
@@ -202,17 +202,12 @@
             "x": 0,
             "y": 18,
             "width": 6,
-            "height": 5,
+            "height": 6,
             "properties": {
                 "title": "ASG CPU Utilization",
                 "stat": "Average",
                 "metrics": [
-                    [
-                        "AWS/EC2",
-                        "CPUUtilization",
-                        "AutoScalingGroupName",
-                        "${autoscaling_group_name}"
-                    ]
+                    [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "capstone-project-app-asg" ]
                 ],
                 "view": "timeSeries",
                 "region": "${aws_region}",
@@ -237,65 +232,10 @@
             }
         },
         {
-            "type": "metric",
-            "x": 6,
-            "y": 18,
-            "width": 6,
-            "height": 5,
-            "properties": {
-                "title": "Memory Utilization",
-                "metrics": [
-                    [ "CWAgent", "mem_used_percent", "InstanceId", "i-034a75e71526ec100", { "stat": "Average" } ]
-                ],
-                "view": "timeSeries",
-                "region": "${aws_region}",
-                "period": 300,
-                "yAxis": {
-                    "left": {
-                        "min": 0,
-                        "max": 100
-                    }
-                }
-            }
-        },
-        {
-            "type": "metric",
-            "x": 12,
-            "y": 18,
-            "width": 6,
-            "height": 5,
-            "properties": {
-                "title": "Network In/Out",
-                "metrics": [
-                    [ "AWS/EC2", "NetworkIn", "InstanceId", "i-034a75e71526ec100", { "stat": "Sum", "label": "Network In" } ],
-                    [ ".", "NetworkOut", "InstanceId", "i-034a75e71526ec100", { "stat": "Sum", "label": "Network Out" } ]
-                ],
-                "view": "timeSeries",
-                "region": "${aws_region}",
-                "period": 300
-            }
-        },
-        {
-            "type": "metric",
-            "x": 18,
-            "y": 18,
-            "width": 6,
-            "height": 5,
-            "properties": {
-                "title": "Disk Usage",
-                "metrics": [
-                    [ "CWAgent", "disk_used_percent", "InstanceId", "i-034a75e71526ec100", "path", "/", "device", "nvme0n1p1", "fstype", "xfs", { "stat": "Average" } ]
-                ],
-                "view": "timeSeries",
-                "region": "${aws_region}",
-                "period": 300
-            }
-        },
-        {
             "type": "text",
-            "x": 0,
-            "y": 23,
-            "width": 24,
+            "x": 6,
+            "y": 17,
+            "width": 18,
             "height": 1,
             "properties": {
                 "markdown": "## 🔍 Correlation View (for Root Cause Analysis)"
@@ -303,16 +243,16 @@
         },
         {
             "type": "metric",
-            "x": 0,
-            "y": 24,
-            "width": 24,
+            "x": 6,
+            "y": 18,
+            "width": 18,
             "height": 6,
             "properties": {
                 "metrics": [
                     [ "AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "${alb_arn_suffix}", { "stat": "p95", "yAxis": "left", "label": "Latency P95 (ms)", "region": "${aws_region}" } ],
                     [ ".", "RequestCount", ".", ".", { "yAxis": "right", "label": "Request Rate", "region": "${aws_region}" } ],
                     [ ".", "HTTPCode_Target_5XX_Count", ".", ".", { "yAxis": "right", "label": "5XX Errors", "color": "#d13212", "region": "${aws_region}" } ],
-                    [ "AWS/EC2", "CPUUtilization", "InstanceId", "i-034a75e71526ec100", { "stat": "Average", "yAxis": "right", "label": "CPU %", "region": "${aws_region}" } ]
+                    [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "capstone-project-app-asg", { "region": "${aws_region}", "stat": "Average" } ]
                 ],
                 "title": "Latency vs Request Rate vs Error Rate vs CPU",
                 "view": "timeSeries",

@@ -7,7 +7,7 @@
             "width": 24,
             "height": 1,
             "properties": {
-                "markdown": "# 🌐 Web Tier Health Dashboard\n**Environment:** Production | **Region:** us-east-1 | **Last Updated:** Auto-refresh every 60s\n\n**On-Call:** [Slack #oncall](https://slack.com) | **Runbook:** [Wiki](https://wiki.company.com)"
+                "markdown": "# 🌐 Web Tier Health Dashboard\n**Environment:** Production | **Region:** ${aws_region} | **Last Updated:** Auto-refresh every 60s\n\n**On-Call:** [Slack #oncall](https://slack.com) | **Runbook:** [Wiki](https://wiki.company.com)"
             }
         },
         {
@@ -18,11 +18,11 @@
             "height": 3,
             "properties": {
                 "metrics": [
-                    [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", "app/capstone-project-alb/2fdaf772217f4ac0", { "stat": "Sum", "period": 60, "region": "us-east-1" } ]
+                    [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${alb_arn_suffix}", { "stat": "Sum", "period": 60, "region": "${aws_region}" } ]
                 ],
                 "title": "Current Request Rate",
                 "view": "singleValue",
-                "region": "us-east-1",
+                "region": "${aws_region}",
                 "period": 300
             }
         },
@@ -34,13 +34,13 @@
             "height": 3,
             "properties": {
                 "metrics": [
-                    [ "AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "LoadBalancer", "app/capstone-project-alb/2fdaf772217f4ac0", { "id": "m1", "visible": false, "region": "us-east-1" } ],
-                    [ ".", "RequestCount", ".", ".", { "id": "m2", "visible": false, "region": "us-east-1" } ],
-                    [ { "expression": "(m1/m2)*100", "label": "Error Rate %", "id": "e1", "region": "us-east-1" } ]
+                    [ "AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "LoadBalancer", "${alb_arn_suffix}", { "id": "m1", "visible": false, "region": "${aws_region}" } ],
+                    [ ".", "RequestCount", ".", ".", { "id": "m2", "visible": false, "region": "${aws_region}" } ],
+                    [ { "expression": "(m1/m2)*100", "label": "Error Rate %", "id": "e1", "region": "${aws_region}" } ]
                 ],
                 "title": "Error Rate (%)",
                 "view": "singleValue",
-                "region": "us-east-1",
+                "region": "${aws_region}",
                 "period": 300
             }
         },
@@ -52,11 +52,11 @@
             "height": 3,
             "properties": {
                 "metrics": [
-                    [ "AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "app/capstone-project-alb/2fdaf772217f4ac0", { "stat": "p95", "region": "us-east-1" } ]
+                    [ "AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "${alb_arn_suffix}", { "stat": "p95", "region": "${aws_region}" } ]
                 ],
                 "title": "P95 Latency (ms)",
                 "view": "singleValue",
-                "region": "us-east-1",
+                "region": "${aws_region}",
                 "period": 300,
                 "setPeriodToTimeRange": true
             }
@@ -69,11 +69,11 @@
             "height": 3,
             "properties": {
                 "metrics": [
-                    [ "AWS/ApplicationELB", "HealthyHostCount", "LoadBalancer", "app/capstone-project-alb/2fdaf772217f4ac0", "TargetGroup", "targetgroup/capstone-project-app-tg/94223f8692b18327", { "stat": "Average", "region": "us-east-1" } ]
+                    [ "AWS/ApplicationELB", "HealthyHostCount", "LoadBalancer", "${alb_arn_suffix}", "TargetGroup", "${target_group_arn_suffix}", { "stat": "Average", "region": "${aws_region}" } ]
                 ],
                 "title": "Healthy Targets",
                 "view": "singleValue",
-                "region": "us-east-1",
+                "region": "${aws_region}",
                 "period": 60
             }
         },
@@ -95,11 +95,11 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", "app/capstone-project-alb/2fdaf772217f4ac0", { "stat": "Sum", "label": "Requests/min", "region": "us-east-1" } ]
+                    [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${alb_arn_suffix}", { "stat": "Sum", "label": "Requests/min", "region": "${aws_region}" } ]
                 ],
                 "title": "Traffic - Request Rate",
                 "view": "timeSeries",
-                "region": "us-east-1",
+                "region": "${aws_region}",
                 "period": 60,
                 "stat": "Sum",
                 "yAxis": {
@@ -117,14 +117,14 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "LoadBalancer", "app/capstone-project-alb/2fdaf772217f4ac0", { "color": "#d13212", "region": "us-east-1" } ],
-                    [ ".", "HTTPCode_Target_4XX_Count", ".", ".", { "color": "#ff7f0e", "region": "us-east-1" } ],
-                    [ ".", "HTTPCode_Target_2XX_Count", ".", ".", { "color": "#2ca02c", "region": "us-east-1" } ]
+                    [ "AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "LoadBalancer", "${alb_arn_suffix}", { "color": "#d13212", "region": "${aws_region}" } ],
+                    [ ".", "HTTPCode_Target_4XX_Count", ".", ".", { "color": "#ff7f0e", "region": "${aws_region}" } ],
+                    [ ".", "HTTPCode_Target_2XX_Count", ".", ".", { "color": "#2ca02c", "region": "${aws_region}" } ]
                 ],
                 "title": "Errors - HTTP Status Codes",
                 "view": "timeSeries",
                 "stacked": true,
-                "region": "us-east-1",
+                "region": "${aws_region}",
                 "period": 60,
                 "stat": "Sum"
             }
@@ -137,13 +137,13 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "app/capstone-project-alb/2fdaf772217f4ac0", { "stat": "p50", "label": "P50", "region": "us-east-1" } ],
-                    [ "...", { "stat": "p95", "label": "P95", "region": "us-east-1" } ],
-                    [ "...", { "label": "P99", "region": "us-east-1" } ]
+                    [ "AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "${alb_arn_suffix}", { "stat": "p50", "label": "P50", "region": "${aws_region}" } ],
+                    [ "...", { "stat": "p95", "label": "P95", "region": "${aws_region}" } ],
+                    [ "...", { "label": "P99", "region": "${aws_region}" } ]
                 ],
                 "title": "Latency - Response Time Percentiles",
                 "view": "timeSeries",
-                "region": "us-east-1",
+                "region": "${aws_region}",
                 "period": 60,
                 "yAxis": {
                     "left": {
@@ -178,12 +178,12 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "AWS/ApplicationELB", "HealthyHostCount", "LoadBalancer", "app/capstone-project-alb/2fdaf772217f4ac0", "TargetGroup", "targetgroup/capstone-project-app-tg/94223f8692b18327", { "stat": "Average", "color": "#2ca02c", "region": "us-east-1" } ],
-                    [ ".", "UnHealthyHostCount", ".", ".", ".", ".", { "stat": "Average", "color": "#d13212", "region": "us-east-1" } ]
+                    [ "AWS/ApplicationELB", "HealthyHostCount", "LoadBalancer", "${alb_arn_suffix}", "TargetGroup", "${target_group_arn_suffix}", { "stat": "Average", "color": "#2ca02c", "region": "${aws_region}" } ],
+                    [ ".", "UnHealthyHostCount", ".", ".", ".", ".", { "stat": "Average", "color": "#d13212", "region": "${aws_region}" } ]
                 ],
                 "title": "Saturation - Target Health",
                 "view": "timeSeries",
-                "region": "us-east-1",
+                "region": "${aws_region}",
                 "period": 60
             }
         },
@@ -191,7 +191,7 @@
             "type": "text",
             "x": 0,
             "y": 17,
-            "width": 24,
+            "width": 6,
             "height": 1,
             "properties": {
                 "markdown": "## 💻 EC2 Resource Utilization"
@@ -202,14 +202,15 @@
             "x": 0,
             "y": 18,
             "width": 6,
-            "height": 5,
+            "height": 6,
             "properties": {
-                "title": "CPU Utilization",
+                "title": "ASG CPU Utilization",
+                "stat": "Average",
                 "metrics": [
-                    [ "AWS/EC2", "CPUUtilization", "InstanceId", "i-034a75e71526ec100", { "stat": "Average" } ]
+                    [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "capstone-project-app-asg" ]
                 ],
                 "view": "timeSeries",
-                "region": "us-east-1",
+                "region": "${aws_region}",
                 "period": 300,
                 "yAxis": {
                     "left": {
@@ -231,65 +232,10 @@
             }
         },
         {
-            "type": "metric",
-            "x": 6,
-            "y": 18,
-            "width": 6,
-            "height": 5,
-            "properties": {
-                "title": "Memory Utilization",
-                "metrics": [
-                    [ "CWAgent", "mem_used_percent", "InstanceId", "i-034a75e71526ec100", { "stat": "Average" } ]
-                ],
-                "view": "timeSeries",
-                "region": "us-east-1",
-                "period": 300,
-                "yAxis": {
-                    "left": {
-                        "min": 0,
-                        "max": 100
-                    }
-                }
-            }
-        },
-        {
-            "type": "metric",
-            "x": 12,
-            "y": 18,
-            "width": 6,
-            "height": 5,
-            "properties": {
-                "title": "Network In/Out",
-                "metrics": [
-                    [ "AWS/EC2", "NetworkIn", "InstanceId", "i-034a75e71526ec100", { "stat": "Sum", "label": "Network In" } ],
-                    [ ".", "NetworkOut", "InstanceId", "i-034a75e71526ec100", { "stat": "Sum", "label": "Network Out" } ]
-                ],
-                "view": "timeSeries",
-                "region": "us-east-1",
-                "period": 300
-            }
-        },
-        {
-            "type": "metric",
-            "x": 18,
-            "y": 18,
-            "width": 6,
-            "height": 5,
-            "properties": {
-                "title": "Disk Usage",
-                "metrics": [
-                    [ "CWAgent", "disk_used_percent", "InstanceId", "i-034a75e71526ec100", "path", "/", "device", "nvme0n1p1", "fstype", "xfs", { "stat": "Average" } ]
-                ],
-                "view": "timeSeries",
-                "region": "us-east-1",
-                "period": 300
-            }
-        },
-        {
             "type": "text",
-            "x": 0,
-            "y": 23,
-            "width": 24,
+            "x": 6,
+            "y": 17,
+            "width": 18,
             "height": 1,
             "properties": {
                 "markdown": "## 🔍 Correlation View (for Root Cause Analysis)"
@@ -297,20 +243,20 @@
         },
         {
             "type": "metric",
-            "x": 0,
-            "y": 24,
-            "width": 24,
+            "x": 6,
+            "y": 18,
+            "width": 18,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "app/capstone-project-alb/2fdaf772217f4ac0", { "stat": "p95", "yAxis": "left", "label": "Latency P95 (ms)", "region": "us-east-1" } ],
-                    [ ".", "RequestCount", ".", ".", { "yAxis": "right", "label": "Request Rate", "region": "us-east-1" } ],
-                    [ ".", "HTTPCode_Target_5XX_Count", ".", ".", { "yAxis": "right", "label": "5XX Errors", "color": "#d13212", "region": "us-east-1" } ],
-                    [ "AWS/EC2", "CPUUtilization", "InstanceId", "i-034a75e71526ec100", { "stat": "Average", "yAxis": "right", "label": "CPU %", "region": "us-east-1" } ]
+                    [ "AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "${alb_arn_suffix}", { "stat": "p95", "yAxis": "left", "label": "Latency P95 (ms)", "region": "${aws_region}" } ],
+                    [ ".", "RequestCount", ".", ".", { "yAxis": "right", "label": "Request Rate", "region": "${aws_region}" } ],
+                    [ ".", "HTTPCode_Target_5XX_Count", ".", ".", { "yAxis": "right", "label": "5XX Errors", "color": "#d13212", "region": "${aws_region}" } ],
+                    [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "capstone-project-app-asg", { "region": "${aws_region}", "stat": "Average" } ]
                 ],
                 "title": "Latency vs Request Rate vs Error Rate vs CPU",
                 "view": "timeSeries",
-                "region": "us-east-1",
+                "region": "${aws_region}",
                 "period": 60,
                 "stat": "Sum"
             }

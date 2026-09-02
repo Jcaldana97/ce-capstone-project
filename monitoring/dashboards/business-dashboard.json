@@ -1,239 +1,236 @@
 {
-  "widgets": [
-    {
-      "type": "text",
-      "x": 0,
-      "y": 0,
-      "width": 24,
-      "height": 1,
-      "properties": {
-        "markdown": "## 💲 Ticket Service "
-      }
-    },
-    {
-      "type": "metric",
-      "x": 0,
-      "y": 1,
-      "width": 4,
-      "height": 4,
-      "properties": {
-        "metrics": [
-          [
-            "OrderService",
-            "TotalCarts",
-            {
-              "region": "us-east-1"
+    "widgets": [
+        {
+            "type": "text",
+            "x": 0,
+            "y": 0,
+            "width": 24,
+            "height": 1,
+            "properties": {
+                "markdown": "## 💲 Ticket Service "
             }
-          ]
-        ],
-        "sparkline": true,
-        "view": "singleValue",
-        "region": "us-east-1",
-        "period": 60,
-        "stat": "Maximum",
-        "liveData": true,
-        "title": "TicketsPurchased"
-      }
-    },
-    {
-      "type": "metric",
-      "x": 0,
-      "y": 5,
-      "width": 4,
-      "height": 4,
-      "properties": {
-        "metrics": [
-          [
-            "OrderService",
-            "CompletedCarts",
-            {
-              "region": "us-east-1"
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 1,
+            "width": 4,
+            "height": 4,
+            "properties": {
+                "metrics": [
+                    [ "Ticket/Application", "TicketsSoldSoFar", { "region": "${aws_region}" } ]
+                ],
+                "sparkline": true,
+                "view": "singleValue",
+                "region": "${aws_region}",
+                "period": 60,
+                "stat": "Maximum",
+                "liveData": true,
+                "title": "TicketsPurchased"
             }
-          ]
-        ],
-        "sparkline": true,
-        "view": "singleValue",
-        "region": "us-east-1",
-        "period": 60,
-        "stat": "Maximum",
-        "liveData": true
-      }
-    },
-    {
-      "type": "metric",
-      "x": 0,
-      "y": 9,
-      "width": 4,
-      "height": 4,
-      "properties": {
-        "metrics": [
-          [
-            "OrderService",
-            "AbandonedCarts",
-            {
-              "region": "us-east-1"
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 5,
+            "width": 4,
+            "height": 4,
+            "properties": {
+                "metrics": [
+                    [ "Ticket/Application", "CompletedOrders", { "region": "${aws_region}" } ]
+                ],
+                "sparkline": true,
+                "view": "singleValue",
+                "region": "${aws_region}",
+                "period": 60,
+                "stat": "Maximum",
+                "liveData": true,
+                "title": "CompletedOrders"
             }
-          ]
-        ],
-        "sparkline": true,
-        "view": "singleValue",
-        "region": "us-east-1",
-        "period": 60,
-        "stat": "Maximum",
-        "liveData": true
-      }
-    },
-    {
-      "type": "metric",
-      "x": 4,
-      "y": 1,
-      "width": 11,
-      "height": 12,
-      "properties": {
-        "metrics": [
-          [
-            "OrderService",
-            "CartAbandonmentRate",
-            {
-              "region": "us-east-1"
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 9,
+            "width": 4,
+            "height": 4,
+            "properties": {
+                "metrics": [
+                    [ "Ticket/Application", "CancelledOrders", { "region": "${aws_region}" } ]
+                ],
+                "sparkline": true,
+                "view": "singleValue",
+                "region": "${aws_region}",
+                "period": 60,
+                "stat": "Maximum",
+                "liveData": true,
+                "title": "CancelledOrders"
             }
-          ]
-        ],
-        "view": "timeSeries",
-        "stacked": false,
-        "region": "us-east-1",
-        "period": 60,
-        "stat": "Maximum"
-      }
-    },
-    {
-      "type": "text",
-      "x": 0,
-      "y": 13,
-      "width": 24,
-      "height": 1,
-      "properties": {
-        "markdown": "## 💲 Sales by Band"
-      }
-    },
-    {
-      "type": "metric",
-      "x": 15,
-      "y": 1,
-      "width": 9,
-      "height": 12,
-      "properties": {
-        "view": "pie",
-        "metrics": [
-          [
-            "Application",
-            "OrderCount"
-          ]
-        ],
-        "region": "us-east-1"
-      }
-    },
-    {
-      "type": "metric",
-      "x": 0,
-      "y": 14,
-      "width": 8,
-      "height": 6,
-      "properties": {
-        "view": "bar",
-        "metrics": [
-          [
-            "OrderService",
-            "TotalCarts"
-          ]
-        ],
-        "region": "us-east-1"
-      }
-    },
-    {
-      "type": "metric",
-      "x": 8,
-      "y": 14,
-      "width": 8,
-      "height": 6,
-      "properties": {
-        "view": "bar",
-        "metrics": [
-          [
-            "OrderService",
-            "TotalCarts"
-          ]
-        ],
-        "region": "us-east-1"
-      }
-    },
-    {
-      "type": "metric",
-      "x": 16,
-      "y": 14,
-      "width": 8,
-      "height": 6,
-      "properties": {
-        "view": "bar",
-        "metrics": [
-          [
-            "OrderService",
-            "TotalCarts"
-          ]
-        ],
-        "region": "us-east-1"
-      }
-    },
-    {
-      "type": "metric",
-      "x": 0,
-      "y": 20,
-      "width": 8,
-      "height": 6,
-      "properties": {
-        "view": "bar",
-        "metrics": [
-          [
-            "OrderService",
-            "TotalCarts"
-          ]
-        ],
-        "region": "us-east-1"
-      }
-    },
-    {
-      "type": "metric",
-      "x": 8,
-      "y": 20,
-      "width": 8,
-      "height": 6,
-      "properties": {
-        "view": "bar",
-        "metrics": [
-          [
-            "OrderService",
-            "TotalCarts"
-          ]
-        ],
-        "region": "us-east-1"
-      }
-    },
-    {
-      "type": "metric",
-      "x": 16,
-      "y": 20,
-      "width": 8,
-      "height": 6,
-      "properties": {
-        "view": "bar",
-        "metrics": [
-          [
-            "OrderService",
-            "TotalCarts"
-          ]
-        ],
-        "region": "us-east-1"
-      }
-    }
-  ]
+        },
+        {
+            "type": "metric",
+            "x": 4,
+            "y": 1,
+            "width": 11,
+            "height": 12,
+            "properties": {
+                "metrics": [
+                    [ "Ticket/Application", "CartAbandonmentRate", { "region": "${aws_region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${aws_region}",
+                "period": 60,
+                "stat": "Maximum",
+                "title": "CartAbandonmentRate"
+            }
+        },
+        {
+            "type": "text",
+            "x": 0,
+            "y": 13,
+            "width": 24,
+            "height": 1,
+            "properties": {
+                "markdown": "## 💲 Sales by Band"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 15,
+            "y": 1,
+            "width": 9,
+            "height": 12,
+            "properties": {
+                "metrics": [
+                    [ "Ticket/Application", "OrderCount", { "region": "${aws_region}", "label": "Coldplay" } ]
+                ],
+                "view": "pie",
+                "region": "${aws_region}",
+                "period": 300,
+                "stat": "Average",
+                "title": "TicketsPerBand"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 14,
+            "width": 8,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                ],
+                "view": "bar",
+                "region": "${aws_region}",
+                "period": 300,
+                "title": "Coldplay - Tickets",
+                "stat": "Average"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 8,
+            "y": 14,
+            "width": 8,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                ],
+                "view": "bar",
+                "region": "${aws_region}",
+                "period": 300,
+                "title": "Tame Impala - Tickets",
+                "stat": "Average"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 16,
+            "y": 14,
+            "width": 8,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                ],
+                "view": "bar",
+                "region": "${aws_region}",
+                "period": 300,
+                "title": "The Strokes - Tickets",
+                "stat": "Average"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 20,
+            "width": 8,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                ],
+                "view": "bar",
+                "region": "${aws_region}",
+                "period": 300,
+                "title": "Bad Bunny - Tickets",
+                "stat": "Average"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 8,
+            "y": 20,
+            "width": 8,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                ],
+                "view": "bar",
+                "region": "${aws_region}",
+                "period": 300,
+                "title": "Twenty One Pilots - Tickets",
+                "stat": "Average"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 16,
+            "y": 20,
+            "width": 8,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "OrderService", "TotalCarts", { "region": "${aws_region}", "label": "Standing", "visible": false } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Upper Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "Lower Tier" } ],
+                    [ "...", { "region": "${aws_region}", "visible": false, "label": "VIP - Front Stage" } ]
+                ],
+                "view": "bar",
+                "region": "${aws_region}",
+                "period": 300,
+                "title": "Caloncho - Tickets",
+                "stat": "Average"
+            }
+        }
+    ]
 }
