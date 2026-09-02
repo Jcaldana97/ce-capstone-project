@@ -1,47 +1,44 @@
+locals {
+  base_attributes = concat(
+    [{ name = var.hash_key, type = "S" }],
+    var.range_key != null ? [{ name = var.range_key, type = "S" }] : [],
+    var.global_secondary_index != null ? [
+      { name = var.global_secondary_index.hash_key, type = "S" },
+      { name = var.global_secondary_index.range_key, type = "N" }
+    ] : []
+  )
+
+  unique_attributes = { for attr in local.base_attributes : attr.name => attr.type }
+}
+
 resource "aws_dynamodb_table" "db" {
-  name         = "${var.project_name}-database"
+  name         = var.table_name
   billing_mode = var.billing_mode
   hash_key     = var.hash_key
+  range_key    = var.range_key
 
-  attribute {
-    name = var.hash_key
-    type = "S"
+  dynamic "attribute" {
+    for_each = local.unique_attributes
+    content {
+      name = attribute.key
+      type = attribute.value
+    }
   }
 
-  attribute {
-    name = "status"
-    type = "S"
-  }
-
-  attribute {
-    name = "updated_at"
-    type = "N"
-  }
-
-  global_secondary_index {
-    name            = "status-updated_at-index"
-    hash_key        = "status"
-    range_key       = "updated_at"
-    projection_type = "ALL"
+  dynamic "global_secondary_index" {
+    for_each = var.global_secondary_index != null ? [var.global_secondary_index] : []
+    content {
+      name            = global_secondary_index.value.name
+      hash_key        = global_secondary_index.value.hash_key
+      range_key       = global_secondary_index.value.range_key
+      projection_type = "ALL"
+    }
   }
 
   ttl {
     attribute_name = var.ttl_attribute
-    enabled        = true
+    enabled        = var.enable_ttl
   }
 
   tags = var.tags
-}
-
-# Create VPC Endpoint for DynamoDB
-
-resource "aws_vpc_endpoint" "dynamodb" {
-  vpc_id            = var.vpc_id
-  service_name      = "com.amazonaws.${var.aws_region}.dynamodb"
-  vpc_endpoint_type = "Gateway"
-  route_table_ids   = [var.data_route_table_id]
-
-  tags = {
-    Name = "${var.project_name}-dynamodb-endpoint"
-  }
 }

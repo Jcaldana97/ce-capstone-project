@@ -8,6 +8,7 @@ import socket
 import urllib.request
 import boto3
 from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key
 
 
 # =========================================================
@@ -23,6 +24,9 @@ CART_TTL_BUFFER_SECONDS = 300  # keep abandoned/completed carts around briefly f
 
 dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 carts_table = dynamodb.Table(CARTS_TABLE_NAME)
+
+METRICS_TABLE_NAME = os.getenv("METRICS_TABLE_NAME", "capstone-project-metrics")
+metrics_table = dynamodb.Table(METRICS_TABLE_NAME)
 
 
 # =========================================================
@@ -51,15 +55,16 @@ app = Flask(__name__)
 
 # Business metrics are kept in memory and written to application.log
 # through structlog. No CloudWatch API is called by this application.
-business_metrics = {
-    "tickets_sold": 0,
-    "completed_orders": 0,
-    "cancelled_orders": 0,
-    "tickets_by_band_zone": {},
-    "tickets_by_band": {},
-}
+# business_metrics = {
+#     "tickets_sold": 0,
+#     "completed_orders": 0,
+#     "cancelled_orders": 0,
+#     "tickets_by_band_zone": {},
+#     "tickets_by_band": {},
+# }
 
-metrics_lock = threading.Lock()
+# metrics_lock = threading.Lock()
+
 
 
 # =========================================================
@@ -163,79 +168,63 @@ def get_availability_zone():
 # =========================================================
 # Business Metrics
 # =========================================================
+def _increment_metric(category, detail, amount):
+    try:
+        metrics_table.update_item(
+            Key={"category": category, "detail": detail},
+            UpdateExpression="ADD #v :amount",
+            ExpressionAttributeNames={"#v": "value"},
+            ExpressionAttributeValues={":amount": amount},
+        )
+    except ClientError as exc:
+        logger.error("business_metric_update_failed", category=category,
+                     detail=detail, error=str(exc))
+
+
+def _get_metric(category, detail):
+    response = metrics_table.get_item(Key={"category": category, "detail": detail})
+    item = response.get("Item")
+    return int(item["value"]) if item else 0
+
 
 def record_business_metrics(event, *, band=None, zone=None, tickets=0):
-    """Update metrics and write them to application.log via structlog."""
-    with metrics_lock:
-        if event == "order_completed":
-            business_metrics["tickets_sold"] += tickets
-            business_metrics["completed_orders"] += 1
+    if event == "order_completed":
+        _increment_metric("GLOBAL", "tickets_sold", tickets)
+        _increment_metric("GLOBAL", "completed_orders", 1)
 
-            if band:
-                business_metrics["tickets_by_band"][band] = (
-                    business_metrics["tickets_by_band"].get(band, 0) + tickets
-                )
+        if band:
+            _increment_metric("BAND", band, tickets)
+            if zone:
+                _increment_metric("BAND_ZONE", f"{band}#{zone}", tickets)
 
-                if zone:
-                    by_zone = business_metrics["tickets_by_band_zone"]
-                    if band not in by_zone:
-                        by_zone[band] = {}
-                    by_zone[band][zone] = (
-                        by_zone[band].get(zone, 0) + tickets
-                    )
+    elif event == "order_cancelled":
+        _increment_metric("GLOBAL", "cancelled_orders", 1)
 
-        elif event == "order_cancelled":
-            business_metrics["cancelled_orders"] += 1
+    _log_current_metrics()
 
-        total_orders = (
-            business_metrics["completed_orders"]
-            + business_metrics["cancelled_orders"]
-        )
 
-        cancellation_rate = (
-            business_metrics["cancelled_orders"] / total_orders * 100
-            if total_orders else 0
-        )
+def _log_current_metrics():
+    tickets_sold = _get_metric("GLOBAL", "tickets_sold")
+    completed_orders = _get_metric("GLOBAL", "completed_orders")
+    cancelled_orders = _get_metric("GLOBAL", "cancelled_orders")
 
-        logger.info(
-            "business_metric",
-            metric_name="TicketsSoldSoFar",
-            value=business_metrics["tickets_sold"],
-        )
-        logger.info(
-            "business_metric",
-            metric_name="CompletedOrders",
-            value=business_metrics["completed_orders"],
-        )
-        logger.info(
-            "business_metric",
-            metric_name="CancelledOrders",
-            value=business_metrics["cancelled_orders"],
-        )
-        logger.info(
-            "business_metric",
-            metric_name="CartAbandonmentRate",
-            value=round(cancellation_rate, 2),
-            unit="Percent",
-        )
+    total_orders = completed_orders + cancelled_orders
+    cancellation_rate = (cancelled_orders / total_orders * 100) if total_orders else 0
 
-        for metric_band, zones in business_metrics["tickets_by_band_zone"].items():
-            for metric_zone, metric_tickets in zones.items():
-                logger.info(
-                    "business_metric",
-                    metric_name="TicketsSoldByBandAndZone",
-                    band=metric_band,
-                    zone=metric_zone,
-                    value=metric_tickets,
-                )
+    logger.info("business_metric", metric_name="TicketsSoldSoFar", value=tickets_sold)
+    logger.info("business_metric", metric_name="CompletedOrders", value=completed_orders)
+    logger.info("business_metric", metric_name="CancelledOrders", value=cancelled_orders)
+    logger.info("business_metric", metric_name="CartAbandonmentRate",
+                value=round(cancellation_rate, 2), unit="Percent")
 
-        for metric_band, metric_tickets in business_metrics["tickets_by_band"].items():
-            logger.info(
-                "business_metric",
-                metric_name="TicketsSoldByBand",
-                band=metric_band,
-                value=metric_tickets,
-            )
+    for item in metrics_table.query(KeyConditionExpression=Key("category").eq("BAND")).get("Items", []):
+        logger.info("business_metric", metric_name="TicketsSoldByBand",
+                    band=item["detail"], value=int(item["value"]))
+
+    for item in metrics_table.query(KeyConditionExpression=Key("category").eq("BAND_ZONE")).get("Items", []):
+        band_name, zone_name = item["detail"].split("#", 1)
+        logger.info("business_metric", metric_name="TicketsSoldByBandAndZone",
+                    band=band_name, zone=zone_name, value=int(item["value"]))
 
 
 def cancel_cart(cart_id, correlation_id=None, reason="manual_cancel"):
