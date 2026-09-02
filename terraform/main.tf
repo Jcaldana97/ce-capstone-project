@@ -112,7 +112,8 @@ module "compute" {
   alb_target_group_app_arn       = module.alb.alb_target_group_app_arn
   key_name                       = var.key_name
   security_group_ssm_endpoint_id = module.security_groups.ssm_security_group_id
-  database_table_arn             = module.database.table_arn
+  carts_table_arn                = module.carts_table.table_arn
+  metrics_table_arn              = module.metrics_table.table_arn
 }
 
 module "monitoring" {
