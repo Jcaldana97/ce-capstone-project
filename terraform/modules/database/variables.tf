@@ -17,8 +17,10 @@ variable "ttl_attribute" {
 }
 
 variable "tags" {
-  type    = map(string)
-  default = {}
+  type = map(string)
+  default = {
+    Role = "database"
+  }
 }
 
 variable "range_key" {

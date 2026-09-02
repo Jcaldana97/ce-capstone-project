@@ -16,6 +16,18 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "owner" {
+  description = "Team or person responsible for the resource"
+  type        = string
+  default     = "julioaldana"
+}
+
+variable "cost_center" {
+  description = "Finance cost center"
+  type        = string
+  default     = "project"
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
