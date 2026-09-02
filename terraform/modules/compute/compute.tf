@@ -101,7 +101,7 @@ resource "aws_launch_template" "app" {
 
     # Configure and Run CloudWatch Agent
     mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
-    nano /opt/aws/amazon-cloudwatch-agent/etc/config.json
+    touch /opt/aws/amazon-cloudwatch-agent/etc/config.json
 
     cp /opt/app/config/cloudwatch-agent-config.json /opt/aws/amazon-cloudwatch-agent/etc/config.json
 

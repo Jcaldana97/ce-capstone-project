@@ -38,6 +38,28 @@ locals {
   }
 }
 
+locals {
+  technical_dashboard_body = templatefile(
+    "${path.module}/dashboards/technical-dashboard.json",
+    {
+      aws_region              = var.aws_region
+      alb_arn_suffix          = var.alb_arn_suffix
+      target_group_arn_suffix = var.target_group_arn_suffix
+      autoscaling_group_name  = var.autoscaling_group_name
+    }
+  )
+}
+
+locals {
+  business_dashboard_body = templatefile(
+    "${path.module}/dashboards/business-dashboard.json",
+    {
+      aws_region = var.aws_region
+    }
+  )
+}
+
+# Log Group Creation 
 resource "aws_cloudwatch_log_group" "application" {
   name              = var.application_log_group_name
   retention_in_days = 30
@@ -49,6 +71,7 @@ resource "aws_cloudwatch_log_group" "application" {
   }
 }
 
+# Custom Metrics
 resource "aws_cloudwatch_log_metric_filter" "application" {
   for_each = local.application_metrics
 
@@ -61,4 +84,17 @@ resource "aws_cloudwatch_log_metric_filter" "application" {
     namespace = var.metric_namespace
     value     = each.value.metric_value
   }
+}
+
+# Dashboards creation
+resource "aws_cloudwatch_dashboard" "technical_dashboard" {
+  dashboard_name = "CapstoneTechnicalDashboard"
+
+  dashboard_body = local.technical_dashboard_body
+}
+
+resource "aws_cloudwatch_dashboard" "business_dashboard" {
+  dashboard_name = "CapstoneBusinessDashboard"
+
+  dashboard_body = local.business_dashboard_body
 }
