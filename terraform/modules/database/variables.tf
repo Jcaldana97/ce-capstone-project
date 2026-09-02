@@ -14,9 +14,9 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "data_subnet_ids" {
-  description = "Private Subnet IDs where the data resides"
-  type        = list(string)
+variable "data_route_table_id" {
+  description = "Private Rout Table IDs where the data resides"
+  type        = string
 }
 
 variable "hash_key" {
