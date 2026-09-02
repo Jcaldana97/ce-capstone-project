@@ -21,7 +21,7 @@ CART_MONITORING_INTERVAL = 30
 CARTS_TABLE_NAME = os.getenv("CARTS_TABLE_NAME", "capstone-project-database")
 CART_TTL_BUFFER_SECONDS = 300  # keep abandoned/completed carts around briefly for metrics/debugging
 
-dynamodb = boto3.resource("dynamodb")
+dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 carts_table = dynamodb.Table(CARTS_TABLE_NAME)
 
 
