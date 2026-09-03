@@ -46,6 +46,44 @@ http://capstone-project-alb-931963269.us-east-1.elb.amazonaws.com/ui
 
 ## Testing instructions
 
+### Simulate High Error Responses
+
+```bash
+for j in {1..3}
+  for i in {1..50}; do
+    curl http://$ALB_DNS/error &
+  done
+  sleep 30
+done
+```
+
+### Simulate high CPU Usage 
+
+```bash
+timeout 600 bash -c 'for i in $(seq 1 $(nproc)); do while :; do :; done & done; wait'
+```
+
+This will attempt to keep all vCPUs at ~100% for 120 seconds and then automatically stop.
+
+### Test ASG and Healthy monitoring
+
+1. Access to an instance via SSM
+```bash
+aws ssm start-session --target INSTANCE_ID
+```
+
+2. Run the following command to stop the application
+```bash
+sudo systemctl stop flask-app
+```
+
+3. After a few seconds, the instance will be marked as Unhealthy. Stop the session in SSM. 
+
+4. After a few minutes, the instance will be terminated and a new one will be created. 
+
+### Terraform testing
+
+For testing the terraform code, go to */tests/terratest* and run ```bash go test ./ -v``` to run the available tests. 
 
 ## Cost summary
 
