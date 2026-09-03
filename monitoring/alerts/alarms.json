@@ -1,0 +1,107 @@
+{
+    "MetricAlarms": [
+        {
+            "AlarmName": "capstone-project-ALBUnhealthyTargets",
+            "AlarmArn": "arn:aws:cloudwatch:us-east-1:829910101871:alarm:capstone-project-ALBUnhealthyTargets",
+            "AlarmDescription": "ALB has unhealthy targets",
+            "AlarmConfigurationUpdatedTimestamp": "2026-09-01T17:09:56.590000+02:00",
+            "ActionsEnabled": true,
+            "OKActions": [],
+            "AlarmActions": [
+                "arn:aws:sns:us-east-1:829910101871:topic-name"
+            ],
+            "InsufficientDataActions": [],
+            "StateValue": "OK",
+            "StateReason": "Threshold Crossed: 1 datapoint [0.0 (02/09/26 16:12:00)] was not greater than or equal to the threshold (1.0).",
+            "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-02T16:15:37.021+0000\",\"startDate\":\"2026-09-02T16:10:00.000+0000\",\"statistic\":\"Maximum\",\"period\":60,\"recentDatapoints\":[1.0,1.0,0.0],\"threshold\":1.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-02T16:12:00.000+0000\",\"sampleCount\":2.0,\"value\":0.0}]}",
+            "StateUpdatedTimestamp": "2026-09-02T18:15:37.023000+02:00",
+            "MetricName": "UnHealthyHostCount",
+            "Namespace": "AWS/ApplicationELB",
+            "Statistic": "Maximum",
+            "Dimensions": [
+                {
+                    "Name": "TargetGroup",
+                    "Value": "targetgroup/capstone-project-app-tg/94223f8692b18327"
+                },
+                {
+                    "Name": "LoadBalancer",
+                    "Value": "app/capstone-project-alb/2fdaf772217f4ac0"
+                }
+            ],
+            "Period": 60,
+            "EvaluationPeriods": 3,
+            "Threshold": 1.0,
+            "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+            "TreatMissingData": "notBreaching",
+            "StateTransitionedTimestamp": "2026-09-02T18:15:37.023000+02:00"
+        },
+        {
+            "AlarmName": "capstone-project-ASGHighCpu",
+            "AlarmArn": "arn:aws:cloudwatch:us-east-1:829910101871:alarm:capstone-project-ASGHighCpu",
+            "AlarmDescription": "Average ASG CPU utilization is too high",
+            "AlarmConfigurationUpdatedTimestamp": "2026-09-01T17:09:56.589000+02:00",
+            "ActionsEnabled": true,
+            "OKActions": [
+                "arn:aws:sns:us-east-1:829910101871:topic-name"
+            ],
+            "AlarmActions": [
+                "arn:aws:sns:us-east-1:829910101871:topic-name"
+            ],
+            "InsufficientDataActions": [],
+            "StateValue": "OK",
+            "StateReason": "Threshold Crossed: 2 datapoints [0.1999368718714097 (01/09/26 15:06:00), 0.1277783091744609 (01/09/26 15:01:00)] were not greater than or equal to the threshold (80.0).",
+            "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-01T15:11:04.882+0000\",\"startDate\":\"2026-09-01T15:01:00.000+0000\",\"statistic\":\"Average\",\"period\":300,\"recentDatapoints\":[0.1277783091744609,0.1999368718714097],\"threshold\":80.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-01T15:06:00.000+0000\",\"sampleCount\":3.0,\"value\":0.1999368718714097}]}",
+            "StateUpdatedTimestamp": "2026-09-01T17:11:04.883000+02:00",
+            "MetricName": "CPUUtilization",
+            "Namespace": "AWS/EC2",
+            "Statistic": "Average",
+            "Dimensions": [
+                {
+                    "Name": "AutoScalingGroupName",
+                    "Value": "capstone-project-app-asg"
+                }
+            ],
+            "Period": 300,
+            "EvaluationPeriods": 2,
+            "Threshold": 80.0,
+            "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+            "TreatMissingData": "notBreaching",
+            "StateTransitionedTimestamp": "2026-09-01T17:11:04.883000+02:00"
+        },
+        {
+            "AlarmName": "capstone-project-HighErrorRate",
+            "AlarmArn": "arn:aws:cloudwatch:us-east-1:829910101871:alarm:capstone-project-HighErrorRate",
+            "AlarmDescription": "ALB when error rate exceeds 10 per 5 minutes",
+            "AlarmConfigurationUpdatedTimestamp": "2026-09-01T17:09:56.576000+02:00",
+            "ActionsEnabled": true,
+            "OKActions": [
+                "arn:aws:sns:us-east-1:829910101871:topic-name"
+            ],
+            "AlarmActions": [
+                "arn:aws:sns:us-east-1:829910101871:topic-name"
+            ],
+            "InsufficientDataActions": [],
+            "StateValue": "OK",
+            "StateReason": "Threshold Crossed: no datapoints were received for 2 periods and 2 missing datapoints were treated as [NonBreaching].",
+            "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2026-09-01T15:11:06.127+0000\",\"statistic\":\"Sum\",\"period\":300,\"recentDatapoints\":[],\"threshold\":10.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2026-09-01T15:04:00.000+0000\"}]}",
+            "StateUpdatedTimestamp": "2026-09-01T17:11:06.130000+02:00",
+            "MetricName": "HTTPCode_ELB_5XX_Count",
+            "Namespace": "AWS/ApplicationELB",
+            "Statistic": "Sum",
+            "Dimensions": [
+                {
+                    "Name": "LoadBalancer",
+                    "Value": "app/capstone-project-alb/2fdaf772217f4ac0"
+                }
+            ],
+            "Period": 300,
+            "EvaluationPeriods": 2,
+            "Threshold": 10.0,
+            "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+            "TreatMissingData": "notBreaching",
+            "StateTransitionedTimestamp": "2026-09-01T17:11:06.130000+02:00"
+        }
+    ],
+    "CompositeAlarms": [],
+    "LogAlarms": []
+}
