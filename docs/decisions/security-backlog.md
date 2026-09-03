@@ -25,14 +25,14 @@
 - [ ] Enable CloudTrail in all regions
 - [ ] Enable GuardDuty
 - [ ] Configure CloudWatch Alarms (unauthorized API calls, root usage)
-- [ ] Create incident response runbook
+- [x] Create incident response runbook
 - [x] Set up SNS alerts for critical findings
  
 ## Epic 5: Compliance & Auditing
-- [ ] Enable Security Hub with CIS Benchmark
+- [x] Enable TfSec and Trivy for Security Scanning
 - [x] Create compliance matrix
 - [ ] Automate evidence collection
-- [ ] Document security controls
+- [x] Document security controls
 - [x] Prepare for demo presentation
  
 ## Epic 6: Security Testing
@@ -40,4 +40,4 @@
 - [ ] Scan Docker images with Trivy
 - [ ] Conduct OWASP ZAP scan
 - [ ] Perform manual security review
-- [ ] Document findings and remediations
+- [x] Document findings and remediations
