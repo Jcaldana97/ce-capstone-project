@@ -36,7 +36,7 @@ jobs:
           uses: aquasecurity/trivy-action@v0.35.0
           with:
             scan-type: config
-            scan-ref: ./terrafrom
+            scan-ref: ./terraform
             exit-code: 1
             severity: CRITICAL,HIGH
 
