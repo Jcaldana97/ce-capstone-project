@@ -5,10 +5,12 @@
 Run the following commands: 
 
 ```bash
-for j in {1..3}
+for j in {1..3}; do
   for i in {1..50}; do
-    curl http://$ALB_DNS/error &
+    curl "http://$ALB_DNS/error" &
   done
+
+  wait
   sleep 30
 done
 ```
