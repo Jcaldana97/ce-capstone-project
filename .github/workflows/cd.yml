@@ -1,10 +1,7 @@
 name: Terraform CD
 
 on:
-  push:
-    branches:
-      - main
-      - dev
+  workflow_dispatch: # Allow manual trigger for testing
 
 permissions:
   contents: read
@@ -15,30 +12,30 @@ env:
 
 jobs:
   tfsec:
-      name: tfsec
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
+    name: tfsec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-        - name: tfsec scan
-          uses: aquasecurity/tfsec-action@v1.0.3
-          with:
-            working_directory: ./terraform
-            soft_fail: false   # set true to only warn, not fail build
+      - name: tfsec scan
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: ./terraform
+          soft_fail: false # set true to only warn, not fail build
 
   trivy:
-      name: trivy
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
+    name: trivy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-        - name: Trivy config scan (IaC misconfig)
-          uses: aquasecurity/trivy-action@v0.35.0
-          with:
-            scan-type: config
-            scan-ref: ./terraform
-            exit-code: 0
-            severity: CRITICAL,HIGH
+      - name: Trivy config scan (IaC misconfig)
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: config
+          scan-ref: ./terraform
+          exit-code: 0
+          severity: CRITICAL,HIGH
 
   terraform-apply:
     name: Deploy Infrastructure
